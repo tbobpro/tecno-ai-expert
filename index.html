@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивная игра "TECNO AI EXPERT"</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Модальное окно для ввода данных -->
+    <div id="namesModal" class="modal">
+        <div class="modal-content">
+            <h2>Введите данные участников</h2>
+            <div class="form-group">
+                <label for="participantName">Имя и фамилия участника:</label>
+                <input type="text" id="participantName" placeholder="Введите имя и фамилию участника">
+            </div>
+            <div class="form-group">
+                <label for="participantRole">Должность участника:</label>
+                <input type="text" id="participantRole" placeholder="Введите должность участника">
+            </div>
+            <div class="form-group">
+                <label for="hostName">Имя и фамилия ведущего:</label>
+                <input type="text" id="hostName" placeholder="Введите имя и фамилию ведущего">
+            </div>
+            <div class="form-group">
+                <label for="network">Сеть:</label>
+                <input type="text" id="network" placeholder="Введите название сети">
+            </div>
+            <div class="form-group">
+                <label for="city">Город:</label>
+                <input type="text" id="city" placeholder="Введите город">
+            </div>
+            <div class="form-group">
+                <label for="storeAddress">Адрес магазина:</label>
+                <input type="text" id="storeAddress" placeholder="Введите адрес магазина">
+            </div>
+            <div class="form-group">
+                <label for="storeCode">Код точки:</label>
+                <input type="text" id="storeCode" placeholder="Введите код точки">
+            </div>
+            <div class="modal-buttons">
+                <button id="startGameBtn">Начать игру</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для пропуска карточки -->
+    <div id="skipModal" class="modal">
+        <div class="modal-content">
+            <h2>Почему была пропущена карточка?</h2>
+            <div class="form-group">
+                <label for="skipReason">Комментарий:</label>
+                <textarea id="skipReason" placeholder="Опишите причину пропуска карточки"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button id="submitSkipBtn">Отправить</button>
+                <button id="cancelSkipBtn">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно с пояснением задания -->
+    <div id="explanationModal" class="modal">
+        <div class="modal-content">
+            <h2 id="explanationTitle">Пояснение задания</h2>
+            <div class="form-group">
+                <p id="explanationText">Здесь будет пояснение к заданию</p>
+            </div>
+            <div class="modal-buttons two-column">
+                <button id="closeExplanationBtn">ОК</button>
+                <button id="skipFromExplanationBtn">Пропустить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрытые формы для отправки данных -->
+    <form id="submit-to-google-sheet" style="display: none;">
+        <input name="Host" type="text" id="form-host">
+        <input name="Participant" type="text" id="form-participant">
+        <input name="ParticipantRole" type="text" id="form-participant-role">
+        <input name="Card" type="text" id="form-card">
+        <input name="Time" type="text" id="form-time">
+        <input name="Status" type="text" id="form-status">
+        <input name="Comment" type="text" id="form-comment">
+        <input name="Round" type="text" id="form-round">
+        <input name="Network" type="text" id="form-network">
+        <input name="City" type="text" id="form-city">
+        <input name="StoreAddress" type="text" id="form-store-address">
+        <input name="StoreCode" type="text" id="form-store-code">
+        <input name="LocalTimestamp" type="text" id="form-local-timestamp">
+        <button type="submit" id="form-submit-btn">Send</button>
+    </form>
+
+    <form id="submit-summary-to-google-sheet" style="display: none;">
+        <input name="Participant" type="text" id="form-summary-participant">
+        <input name="ParticipantRole" type="text" id="form-summary-participant-role">
+        <input name="Host" type="text" id="form-summary-host">
+        <input name="City" type="text" id="form-summary-city">
+        <input name="Network" type="text" id="form-summary-network">
+        <input name="StoreCode" type="text" id="form-summary-store-code">
+        <input name="StoreAddress" type="text" id="form-summary-store-address">
+        <input name="LocalTimestamp" type="text" id="form-summary-timestamp">
+        <input name="CompletedCount" type="text" id="form-summary-completed-count">
+        <input name="TotalTime" type="text" id="form-summary-total-time">
+        <button type="submit" id="form-summary-submit-btn">Send</button>
+    </form>
+
+    <!-- Основной контент игры -->
+    <div class="main-content">
+        <header>
+            <h1>TECNO AI EXPERT</h1>
+            <div class="leaderboard-section">
+                <button id="leaderboardBtn" class="leaderboard-btn">
+                    <i class="fas fa-trophy"></i> Таблица лидеров
+                </button>
+            </div>
+            <div class="instructions">
+                <p>Кликните на карточку, чтобы перевернуть её и увидеть текст. Карточки перемешиваются при каждом раунде.</p>
+            </div>
+        </header>
+
+        <div class="game-container">
+            <div class="round-info" id="roundInfo">
+                Раунд: <span id="currentRound">1</span> из 6
+            </div>
+
+            <div class="cards-grid" id="cardsGrid">
+                <!-- Карточки будут сгенерированы с помощью JavaScript -->
+            </div>
+
+            <div class="timer-container">
+                <h2>Секундомер</h2>
+                <div class="timer" id="timer">00:00.00</div>
+                <div class="controls">
+                    <button id="startBtn" disabled>Старт</button>
+                    <button id="stopBtn" disabled>Стоп</button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="doneBtn" disabled>Сделано</button>
+                <button id="skipBtn" disabled>Пропущено</button>
+            </div>
+
+            <div class="loading" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+                <p>Отправка данных...</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <p>✓ Данные успешно отправлены!</p>
+            </div>
+
+            <div class="results-table" id="resultsTable">
+                <h2>Результаты игры</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Раунд</th>
+                            <th>Карточка</th>
+                            <th>Время</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- Результаты будут добавляться с помощью JavaScript -->
+                    </tbody>
+                </table>
+                <div id="summaryResults" style="margin-top: 20px; display: none;">
+                    <h3>Итоги игры</h3>
+                    <p>Выполнено заданий: <span id="completedCount">0</span> из 6</p>
+                    <p>Общее время: <span id="totalTime">00:00.00</span></p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Интерактивная игра "TECNO AI EXPERT" &copy; 2025</p>
+        </footer>
+    </div>
+
+    <!-- Подключаем отдельные JS файлы -->
+    <script src="modals.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
