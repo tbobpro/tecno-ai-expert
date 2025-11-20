@@ -553,14 +553,12 @@ function completeRound(status, comment = '') {
     // Обновляем счетчик выполненных заданий
     if (status === 'Сделано') {
         completedTasksCount++;
-        
-        // Отправляем данные о выполненном задании для лидерборда по категориям
-        sendCompletedTaskData(currentCardText, formatTime(elapsedTime), status);
+        // УБРАЛИ вызов sendCompletedTaskData - данные теперь отправляются только через sendToGoogleSheets
     }
     
     const now = new Date();
-    const gameDate = now.toISOString().split('T')[0]; // Дата в формате YYYY-MM-DD
-    const roundTime = now.toTimeString().split(' ')[0]; // Время в формате HH:MM:SS
+    const gameDate = now.toISOString().split('T')[0];
+    const roundTime = now.toTimeString().split(' ')[0];
     
     const result = {
         round: currentRound,
@@ -586,6 +584,8 @@ function completeRound(status, comment = '') {
     }
     
     addResultToTable(result);
+    
+    // ОТПРАВЛЯЕМ ДАННЫЕ ТОЛЬКО ОДИН РАЗ - через sendToGoogleSheets
     sendToGoogleSheets(result);
     
     resetTimer();
@@ -602,6 +602,7 @@ function completeRound(status, comment = '') {
     
     currentCardText = '';
 }
+
 
 // Функция для добавления результата в таблицу
 function addResultToTable(result) {
