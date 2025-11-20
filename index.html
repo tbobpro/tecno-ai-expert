@@ -464,36 +464,37 @@
     </div>
 
     <!-- Скрытая форма для отправки данных в Google Таблицы -->
-    <form id="submit-to-google-sheet" style="display: none;">
-        <input name="Host" type="text" id="form-host">
-        <input name="Participant" type="text" id="form-participant">
-        <input name="ParticipantRole" type="text" id="form-participant-role">
-        <input name="Card" type="text" id="form-card">
-        <input name="Time" type="text" id="form-time">
-        <input name="Status" type="text" id="form-status">
-        <input name="Comment" type="text" id="form-comment">
-        <input name="Round" type="text" id="form-round">
-        <input name="Network" type="text" id="form-network">
-        <input name="City" type="text" id="form-city">
-        <input name="StoreAddress" type="text" id="form-store-address">
-        <input name="StoreCode" type="text" id="form-store-code">
-        <button type="submit" id="form-submit-btn">Send</button>
-    </form>
+    form id="submit-to-google-sheet" style="display: none;">
+    <input name="Host" type="text" id="form-host">
+    <input name="Participant" type="text" id="form-participant">
+    <input name="ParticipantRole" type="text" id="form-participant-role">
+    <input name="Card" type="text" id="form-card">
+    <input name="Time" type="text" id="form-time">
+    <input name="Status" type="text" id="form-status">
+    <input name="Comment" type="text" id="form-comment">
+    <input name="Round" type="text" id="form-round">
+    <input name="Network" type="text" id="form-network">
+    <input name="City" type="text" id="form-city">
+    <input name="StoreAddress" type="text" id="form-store-address">
+    <input name="StoreCode" type="text" id="form-store-code">
+    <input name="LocalTimestamp" type="text" id="form-local-timestamp">
+    <button type="submit" id="form-submit-btn">Send</button>
+</form>
 
     <!-- Скрытая форма для отправки итогов в Google Таблицы -->
     <form id="submit-summary-to-google-sheet" style="display: none;">
-        <input name="Participant" type="text" id="form-summary-participant">
-        <input name="ParticipantRole" type="text" id="form-summary-participant-role">
-        <input name="Host" type="text" id="form-summary-host">
-        <input name="City" type="text" id="form-summary-city">
-        <input name="Network" type="text" id="form-summary-network">
-        <input name="StoreCode" type="text" id="form-summary-store-code">
-        <input name="StoreAddress" type="text" id="form-summary-store-address">
-        <input name="Timestamp" type="text" id="form-summary-timestamp">
-        <input name="CompletedCount" type="text" id="form-summary-completed-count">
-        <input name="TotalTime" type="text" id="form-summary-total-time">
-        <button type="submit" id="form-summary-submit-btn">Send</button>
-    </form>
+    <input name="Participant" type="text" id="form-summary-participant">
+    <input name="ParticipantRole" type="text" id="form-summary-participant-role">
+    <input name="Host" type="text" id="form-summary-host">
+    <input name="City" type="text" id="form-summary-city">
+    <input name="Network" type="text" id="form-summary-network">
+    <input name="StoreCode" type="text" id="form-summary-store-code">
+    <input name="StoreAddress" type="text" id="form-summary-store-address">
+    <input name="LocalTimestamp" type="text" id="form-summary-timestamp">
+    <input name="CompletedCount" type="text" id="form-summary-completed-count">
+    <input name="TotalTime" type="text" id="form-summary-total-time">
+    <button type="submit" id="form-summary-submit-btn">Send</button>
+</form>
 
     <!-- Основной контент игры -->
     <div class="main-content">
@@ -908,79 +909,94 @@
                 link.click();
                 document.body.removeChild(link);
             }
+            
 
-            // Функция для отправки данных в Google Таблицы
-            function sendToGoogleSheets(result) {
-                // Заполняем скрытую форму данными
-                formHost.value = result.host;
-                formParticipant.value = result.participant;
-                formParticipantRole.value = result.participantRole;
-                formCard.value = result.card;
-                formTime.value = result.time;
-                formStatus.value = result.status;
-                formComment.value = result.comment;
-                formRound.value = result.round;
-                formNetwork.value = result.network;
-                formCity.value = result.city;
-                formStoreAddress.value = result.storeAddress;
-                formStoreCode.value = result.storeCode;
-                
-                // Показываем индикатор загрузки
-                loadingIndicator.style.display = 'block';
-                
-                // Отправляем форму - игнорируем ошибки CORS
-                fetch(scriptURL, { 
-                    method: 'POST', 
-                    body: new FormData(googleForm),
-                    mode: 'no-cors'
-                })
-                .then(() => {
-                    // При использовании no-cors мы не получим ответ, но запрос будет отправлен
-                    console.log('Данные отправлены (no-cors режим)');
-                    loadingIndicator.style.display = 'none';
-                    successMessage.style.display = 'block';
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 3000);
-                })
-                .catch(error => {
-                    // Игнорируем ошибки, так как данные скорее всего отправлены
-                    console.log('Запрос выполнен (ошибка CORS проигнорирована)');
-                    loadingIndicator.style.display = 'none';
-                    successMessage.style.display = 'block';
-                    setTimeout(() => {
-                        successMessage.style.display = 'none';
-                    }, 3000);
-                });
-            }
+            // Функция для получения локального времени в формате строки
+function getLocalTimestamp() {
+    const now = new Date();
+    
+    // Форматируем дату в формате: YYYY-MM-DD HH:MM:SS
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
 
-            // Функция для отправки итогов в Google Таблицы
-            function sendSummaryToGoogleSheets() {
-                // Заполняем скрытую форму данными
-                formSummaryParticipant.value = participantName;
-                formSummaryParticipantRole.value = participantRole;
-                formSummaryHost.value = hostName;
-                formSummaryCity.value = city;
-                formSummaryNetwork.value = network;
-                formSummaryStoreCode.value = storeCode;
-                formSummaryStoreAddress.value = storeAddress;
-                formSummaryTimestamp.value = new Date().toISOString();
-                formSummaryCompletedCount.value = completedTasksCount;
-                formSummaryTotalTime.value = formatTime(totalGameTime);
-                
-                // Отправляем форму - игнорируем ошибки CORS
-                fetch(scriptURL, { 
-                    method: 'POST', 
-                    body: new FormData(summaryForm),
-                    mode: 'no-cors'
-                })
-                .then(() => {
-                    console.log('Итоговые данные отправлены (no-cors режим)');
-                })
-                .catch(error => {
-                    console.log('Запрос итогов выполнен (ошибка CORS проигнорирована)');
-                });
-            }
+// Функция для отправки данных в Google Таблицы
+function sendToGoogleSheets(result) {
+    // Заполняем скрытую форму данными
+    formHost.value = result.host;
+    formParticipant.value = result.participant;
+    formParticipantRole.value = result.participantRole;
+    formCard.value = result.card;
+    formTime.value = result.time;
+    formStatus.value = result.status;
+    formComment.value = result.comment;
+    formRound.value = result.round;
+    formNetwork.value = result.network;
+    formCity.value = result.city;
+    formStoreAddress.value = result.storeAddress;
+    formStoreCode.value = result.storeCode;
+    formLocalTimestamp.value = getLocalTimestamp(); // Локальное время участника
+    
+    // Показываем индикатор загрузки
+    loadingIndicator.style.display = 'block';
+    
+    // Отправляем форму
+    fetch(scriptURL, { 
+        method: 'POST', 
+        body: new FormData(googleForm),
+        mode: 'no-cors'
+    })
+    .then(() => {
+        console.log('Данные отправлены (no-cors режим)');
+        loadingIndicator.style.display = 'none';
+        successMessage.style.display = 'block';
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 3000);
+    })
+    .catch(error => {
+        console.log('Запрос выполнен (ошибка CORS проигнорирована)');
+        loadingIndicator.style.display = 'none';
+        successMessage.style.display = 'block';
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 3000);
+    });
+}
+
+// Функция для отправки итогов в Google Таблицы
+function sendSummaryToGoogleSheets() {
+    // Заполняем скрытую форму данными
+    formSummaryParticipant.value = participantName;
+    formSummaryParticipantRole.value = participantRole;
+    formSummaryHost.value = hostName;
+    formSummaryCity.value = city;
+    formSummaryNetwork.value = network;
+    formSummaryStoreCode.value = storeCode;
+    formSummaryStoreAddress.value = storeAddress;
+    formSummaryTimestamp.value = getLocalTimestamp(); // Локальное время участника
+    formSummaryCompletedCount.value = completedTasksCount;
+    formSummaryTotalTime.value = formatTime(totalGameTime);
+    
+    // Отправляем форму
+    fetch(scriptURL, { 
+        method: 'POST', 
+        body: new FormData(summaryForm),
+        mode: 'no-cors'
+    })
+    .then(() => {
+        console.log('Итоговые данные отправлены (no-cors режим)');
+    })
+    .catch(error => {
+        console.log('Запрос итогов выполнен (ошибка CORS проигнорирована)');
+    });
+}
 
             // Функция для завершения раунда
             function completeRound(status, comment = '') {
