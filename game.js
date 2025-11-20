@@ -8,6 +8,7 @@ let isRunning = false;
 let currentRound = 1;
 let totalRounds = 6;
 let gameStarted = false;
+let gameEnded = false;
 let participantName = '';
 let participantRole = '';
 let hostName = '';
@@ -76,7 +77,7 @@ window.cardExplanations = {
 // URL скрипта Google Apps
 const scriptURL = 'https://script.google.com/macros/s/AKfycbx2Lru53tCgMMZkAokfyoeoOc8qRTVQuMKX09fmdGWIOPy3udHral5iH0H0k6E77UAK/exec';
 
-// Инициализация игры при загрузке DOM
+// Функция для инициализации игры при загрузке DOM
 document.addEventListener('DOMContentLoaded', function() {
     initializeGame();
 });
@@ -88,6 +89,8 @@ function initializeGame() {
     initializeModals();
     // Сброс таймера
     resetTimer();
+    // Сбрасываем флаг завершения игры
+    gameEnded = false;
 }
 
 function initializeEventListeners() {
@@ -172,6 +175,9 @@ function createCards() {
         `;
         
         card.addEventListener('click', function() {
+            // Блокируем клик, если игра завершена
+            if (gameEnded) return;
+            
             if (!this.classList.contains('flipped') && !cardFlippedInRound) {
                 this.classList.add('flipped');
                 currentCardText = this.dataset.text;
@@ -517,6 +523,7 @@ function addResultToTable(result) {
 }
 
 // Функция для завершения игры
+// Функция для завершения игры
 function endGame() {
     const resultsTable = document.getElementById('resultsTable');
     const summaryResults = document.getElementById('summaryResults');
@@ -538,6 +545,18 @@ function endGame() {
     if (startBtn) startBtn.disabled = true;
     if (stopBtn) stopBtn.disabled = true;
     if (currentRoundDisplay) currentRoundDisplay.textContent = totalRounds;
+    
+    // Устанавливаем флаг завершения игры
+    gameEnded = true;
+    
+    // Блокируем все карточки
+    const allCards = document.querySelectorAll('.card');
+    allCards.forEach(card => {
+        card.classList.add('disabled');
+        // Добавляем стиль для визуального обозначения заблокированных карточек
+        card.style.opacity = '0.6';
+        card.style.cursor = 'not-allowed';
+    });
     
     // Сохраняем результаты в файл
     saveGameResultsToFile();
