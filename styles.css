@@ -484,9 +484,14 @@ textarea {
 /* Дополнительные стили для модального окна ввода данных */
 .game-title-modal {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-size: 2rem;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.leaderboard-modal-section {
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .modal-subtitle {
@@ -499,5 +504,20 @@ textarea {
 /* Стили для кнопки лидерборда в модальном окне */
 #leaderboardBtnFromModal {
     background: linear-gradient(45deg, #FFD700 0%, #FFA500 100%);
-    margin-top: 10px;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #333;
+    width: 100%;
+    max-width: 250px;
+}
+
+#leaderboardBtnFromModal:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
