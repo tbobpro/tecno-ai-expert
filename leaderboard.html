@@ -14,20 +14,20 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-body {
-    background: linear-gradient(135deg, rgba(106, 17, 203, 0.8) 0%, rgba(37, 117, 252, 0.8) 100%), url('background.png') no-repeat center center fixed;
-    background-size: cover;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    color: white;
-}
+        body {
+            background: linear-gradient(135deg, rgba(106, 17, 203, 0.8) 0%, rgba(37, 117, 252, 0.8) 100%), url('background.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
 
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1200px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             padding: 20px;
@@ -53,6 +53,40 @@ body {
             line-height: 1.4;
         }
 
+        .leaderboard-type-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .type-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 180px;
+        }
+
+        .type-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .type-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .type-btn.active:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+
         .filters {
             display: flex;
             gap: 12px;
@@ -73,6 +107,23 @@ body {
             max-width: 200px;
         }
 
+        .category-selector {
+            display: none;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .category-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 1rem;
+            color: #333;
+            min-width: 300px;
+            text-align: center;
+        }
+
         .table-container {
             overflow-x: auto;
             margin-top: 20px;
@@ -83,7 +134,7 @@ body {
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px; /* Минимальная ширина для сохранения читаемости */
+            min-width: 600px;
         }
 
         th, td {
@@ -197,12 +248,31 @@ body {
                 font-size: 0.95rem;
             }
             
+            .leaderboard-type-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .type-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
             .filters {
                 flex-direction: column;
                 align-items: center;
             }
             
             .filter-select {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .category-selector {
+                width: 100%;
+            }
+            
+            .category-select {
                 width: 100%;
                 max-width: 300px;
             }
@@ -234,6 +304,10 @@ body {
             
             header {
                 margin-bottom: 20px;
+            }
+            
+            .leaderboard-type-selector {
+                margin-bottom: 15px;
             }
             
             .filters {
@@ -286,51 +360,19 @@ body {
                 margin-top: 20px;
             }
         }
-
-        /* Очень маленькие экраны */
-        @media (max-width: 360px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                padding: 12px;
-            }
-            
-            h1 {
-                font-size: 1.6rem;
-            }
-            
-            .subtitle {
-                font-size: 0.9rem;
-            }
-            
-            .leaderboard-table {
-                min-width: 450px;
-            }
-            
-            th, td {
-                padding: 8px 6px;
-                font-size: 0.85rem;
-            }
-        }
-
-        /* Портретная ориентация на мобильных */
-        @media (max-width: 768px) and (orientation: portrait) {
-            .table-container {
-                margin-left: -10px;
-                margin-right: -10px;
-                width: calc(100% + 20px);
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1><i class="fas fa-trophy"></i> Таблица лидеров</h1>
-            <div class="subtitle">Топ-15 участников, выполнивших все 6 заданий</div>
+            <div class="subtitle">Лучшие результаты участников по категориям заданий</div>
         </header>
+
+        <div class="leaderboard-type-selector">
+            <button class="type-btn active" data-type="overall">Общий зачет (Топ-15)</button>
+            <button class="type-btn" data-type="category">Топ по категориям</button>
+        </div>
 
         <div class="filters">
             <select id="networkFilter" class="filter-select">
@@ -338,6 +380,33 @@ body {
             </select>
             <select id="cityFilter" class="filter-select">
                 <option value="">Все города</option>
+            </select>
+        </div>
+
+        <div class="category-selector" id="categorySelector">
+            <select id="categoryFilter" class="category-select">
+                <option value="">Выберите категорию</option>
+                <option value="Ассистент Ella (Где найти помощника)">Ассистент Ella (Где найти помощника)</option>
+                <option value="Ассистент Ella (Умный поиск)">Ассистент Ella (Умный поиск)</option>
+                <option value="Помощник по работе с документами">Помощник по работе с документами</option>
+                <option value="Редактор AI">Редактор AI</option>
+                <option value="Работа с документами (Картинка в документ)">Работа с документами (Картинка в документ)</option>
+                <option value="Работа с документами (Расшифровка записей диктофона)">Работа с документами (Расшифровка записей диктофона)</option>
+                <option value="Круг для поиска">Круг для поиска</option>
+                <option value="Интеграция с сервисами Яндекс">Интеграция с сервисами Яндекс</option>
+                <option value="Решение математических задач">Решение математических задач</option>
+                <option value="Студия AI (Удаление объекта с фотографии)">Студия AI (Удаление объекта с фотографии)</option>
+                <option value="Студия AI (Расширение границ кадра)">Студия AI (Расширение границ кадра)</option>
+                <option value="Студия AI (AI Доска для рисования)">Студия AI (AI Доска для рисования)</option>
+                <option value="Студия AI (AI Генератор обоев)">Студия AI (AI Генератор обоев)</option>
+                <option value="Студия AI (Улучшение групповых портретов)">Студия AI (Улучшение групповых портретов)</option>
+                <option value="Умный переводчик (Перевод разговора)">Умный переводчик (Перевод разговора)</option>
+                <option value="Умный переводчик (Синхронный перевод)">Умный переводчик (Синхронный перевод)</option>
+                <option value="Умный переводчик (Перевод изображений)">Умный переводчик (Перевод изображений)</option>
+                <option value="Телефонный помощник (Сводка и расшифровка звонков)">Телефонный помощник (Сводка и расшифровка звонков)</option>
+                <option value="Телефонный помощник (Автоответчик AI)">Телефонный помощник (Автоответчик AI)</option>
+                <option value="Телефонный помощник (Перевод звонков в реальном времени)">Телефонный помощник (Перевод звонков в реальном времени)</option>
+                <option value="Телефонный помощник (ИИ Шумоподавление)">Телефонный помощник (ИИ Шумоподавление)</option>
             </select>
         </div>
 
@@ -353,13 +422,8 @@ body {
         <div class="table-container">
             <table class="leaderboard-table" id="leaderboardTable" style="display: none;">
                 <thead>
-                    <tr>
-                        <th class="rank">Место</th>
-                        <th>Участник</th>
-                        <th>Должность</th>
-                        <th>Город</th>
-                        <th>Сеть</th>
-                        <th>Общее время</th>
+                    <tr id="tableHeader">
+                        <!-- Заголовки будут заполнены через JavaScript -->
                     </tr>
                 </thead>
                 <tbody id="leaderboardBody">
@@ -379,8 +443,11 @@ body {
         // URL скрипта Google Apps
         const scriptURL = 'https://script.google.com/macros/s/AKfycbx2Lru53tCgMMZkAokfyoeoOc8qRTVQuMKX09fmdGWIOPy3udHral5iH0H0k6E77UAK/exec';
 
-        // Функция для загрузки данных лидерборда
-        async function loadLeaderboard() {
+        // Текущий тип лидерборда
+        let currentLeaderboardType = 'overall';
+
+        // Функция для загрузки общего лидерборда
+        async function loadOverallLeaderboard() {
             try {
                 const response = await fetch(scriptURL + '?action=getLeaderboard');
                 const data = await response.json();
@@ -389,8 +456,19 @@ body {
                 const table = document.getElementById('leaderboardTable');
                 const noData = document.getElementById('noData');
                 const tbody = document.getElementById('leaderboardBody');
+                const tableHeader = document.getElementById('tableHeader');
                 
                 if (data && data.length > 0) {
+                    // Устанавливаем заголовки для общего зачета
+                    tableHeader.innerHTML = `
+                        <th class="rank">Место</th>
+                        <th>Участник</th>
+                        <th>Должность</th>
+                        <th>Город</th>
+                        <th>Сеть</th>
+                        <th>Общее время</th>
+                    `;
+                    
                     // Заполняем таблицу
                     tbody.innerHTML = '';
                     data.forEach((participant, index) => {
@@ -413,6 +491,60 @@ body {
                     populateFilters(data);
                 } else {
                     loading.style.display = 'none';
+                    noData.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                document.getElementById('loading').innerHTML = '<p>Ошибка загрузки данных</p>';
+            }
+        }
+
+        // Функция для загрузки лидерборда по категории
+        async function loadCategoryLeaderboard(category) {
+            try {
+                const response = await fetch(scriptURL + '?action=getCategoryLeaderboard&category=' + encodeURIComponent(category));
+                const data = await response.json();
+                
+                const loading = document.getElementById('loading');
+                const table = document.getElementById('leaderboardTable');
+                const noData = document.getElementById('noData');
+                const tbody = document.getElementById('leaderboardBody');
+                const tableHeader = document.getElementById('tableHeader');
+                
+                if (data && data.length > 0) {
+                    // Устанавливаем заголовки для категории
+                    tableHeader.innerHTML = `
+                        <th class="rank">Место</th>
+                        <th>Участник</th>
+                        <th>Должность</th>
+                        <th>Город</th>
+                        <th>Сеть</th>
+                        <th>Время</th>
+                        <th>Дата</th>
+                    `;
+                    
+                    // Заполняем таблицу
+                    tbody.innerHTML = '';
+                    data.forEach((participant, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="rank rank-${index + 1}">${index + 1}</td>
+                            <td class="participant-name">${participant.participant}</td>
+                            <td>${participant.participantRole}</td>
+                            <td>${participant.city}</td>
+                            <td>${participant.network}</td>
+                            <td>${participant.time}</td>
+                            <td>${participant.date}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    
+                    loading.style.display = 'none';
+                    table.style.display = 'table';
+                    noData.style.display = 'none';
+                } else {
+                    loading.style.display = 'none';
+                    table.style.display = 'none';
                     noData.style.display = 'block';
                 }
             } catch (error) {
@@ -450,6 +582,8 @@ body {
 
         // Функция для фильтрации таблицы
         function filterLeaderboard() {
+            if (currentLeaderboardType !== 'overall') return;
+            
             const networkFilter = document.getElementById('networkFilter').value;
             const cityFilter = document.getElementById('cityFilter').value;
             const rows = document.querySelectorAll('#leaderboardBody tr');
@@ -465,8 +599,62 @@ body {
             });
         }
 
-        // Загружаем данные при загрузке страницы
-        document.addEventListener('DOMContentLoaded', loadLeaderboard);
+        // Функция для переключения типа лидерборда
+        function switchLeaderboardType(type) {
+            currentLeaderboardType = type;
+            
+            const overallBtn = document.querySelector('[data-type="overall"]');
+            const categoryBtn = document.querySelector('[data-type="category"]');
+            const filters = document.querySelector('.filters');
+            const categorySelector = document.getElementById('categorySelector');
+            
+            // Сбрасываем состояние
+            overallBtn.classList.remove('active');
+            categoryBtn.classList.remove('active');
+            
+            if (type === 'overall') {
+                overallBtn.classList.add('active');
+                filters.style.display = 'flex';
+                categorySelector.style.display = 'none';
+                loadOverallLeaderboard();
+            } else {
+                categoryBtn.classList.add('active');
+                filters.style.display = 'none';
+                categorySelector.style.display = 'flex';
+                
+                // Сбрасываем таблицу при переключении на категории
+                const table = document.getElementById('leaderboardTable');
+                const tbody = document.getElementById('leaderboardBody');
+                const noData = document.getElementById('noData');
+                
+                table.style.display = 'none';
+                tbody.innerHTML = '';
+                noData.style.display = 'none';
+            }
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Загружаем общий лидерборд по умолчанию
+            loadOverallLeaderboard();
+            
+            // Обработчики для переключения типа лидерборда
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    switchLeaderboardType(type);
+                });
+            });
+            
+            // Обработчик для выбора категории
+            document.getElementById('categoryFilter').addEventListener('change', function() {
+                const category = this.value;
+                if (category) {
+                    document.getElementById('loading').style.display = 'block';
+                    loadCategoryLeaderboard(category);
+                }
+            });
+        });
     </script>
 </body>
 </html>
