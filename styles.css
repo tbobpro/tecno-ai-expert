@@ -467,6 +467,9 @@ textarea {
         grid-template-columns: 1fr;
     }
 
+
+}
+
     /* Стили для заблокированных карточек после завершения игры */
 .card.disabled[style] {
     pointer-events: none;
@@ -481,5 +484,4 @@ textarea {
 .game-ended .card-front,
 .game-ended .card-back {
     filter: grayscale(0.3);
-}
 }
