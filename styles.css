@@ -466,4 +466,20 @@ textarea {
     .modal-buttons.two-column {
         grid-template-columns: 1fr;
     }
+
+    /* Стили для заблокированных карточек после завершения игры */
+.card.disabled[style] {
+    pointer-events: none;
+}
+
+/* Дополнительные стили для визуального обозначения завершенной игры */
+.game-ended .card {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.game-ended .card-front,
+.game-ended .card-back {
+    filter: grayscale(0.3);
+}
 }
