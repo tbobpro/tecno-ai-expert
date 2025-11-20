@@ -25,6 +25,21 @@
             color: white;
         }
 
+        /* Фон для мобильных устройств */
+        @media (max-width: 768px) {
+            body {
+                background: linear-gradient(135deg, rgba(106, 17, 203, 0.8) 0%, rgba(37, 117, 252, 0.8) 100%), url('background-mobile.jpg') no-repeat center center fixed;
+                background-size: cover;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+        }
+
         .container {
             width: 100%;
             max-width: 1200px;
@@ -33,6 +48,21 @@
             padding: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
+        }
+
+        /* Адаптивность контейнера */
+        @media (max-width: 768px) {
+            .container {
+                padding: 18px;
+                border-radius: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+                border-radius: 10px;
+            }
         }
 
         header {
@@ -51,6 +81,38 @@
             opacity: 0.9;
             margin-bottom: 20px;
             line-height: 1.4;
+        }
+
+        /* Адаптивность заголовков */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 0.95rem;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
         }
 
         .leaderboard-type-selector {
@@ -87,6 +149,29 @@
             background: rgba(255, 255, 255, 0.9);
         }
 
+        /* Адаптивность кнопок выбора типа */
+        @media (max-width: 768px) {
+            .leaderboard-type-selector {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .type-btn {
+                width: 100%;
+                max-width: 300px;
+                padding: 10px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .type-btn {
+                min-width: auto;
+                padding: 10px 12px;
+                font-size: 0.95rem;
+            }
+        }
+
         .filters {
             display: flex;
             gap: 12px;
@@ -107,6 +192,28 @@
             max-width: 200px;
         }
 
+        /* Адаптивность фильтров */
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .filter-select {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filter-select {
+                padding: 8px 12px;
+                font-size: 0.95rem;
+                min-width: 120px;
+            }
+        }
+
         .category-selector {
             display: none;
             justify-content: center;
@@ -124,17 +231,70 @@
             text-align: center;
         }
 
+        /* Адаптивность выбора категории */
+        @media (max-width: 768px) {
+            .category-selector {
+                width: 100%;
+            }
+            
+            .category-select {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .category-select {
+                min-width: auto;
+                width: 100%;
+                padding: 8px 12px;
+                font-size: 0.95rem;
+            }
+        }
+
         .table-container {
             overflow-x: auto;
             margin-top: 20px;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.05);
+            -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+        }
+
+        /* Улучшение отображения скролла на мобильных */
+        @media (max-width: 768px) {
+            .table-container {
+                margin-left: -5px;
+                margin-right: -5px;
+                width: calc(100% + 10px);
+                border-radius: 8px;
+            }
         }
 
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
             min-width: 600px;
+        }
+
+        /* Адаптивность таблицы */
+        @media (max-width: 768px) {
+            .leaderboard-table {
+                min-width: 550px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .leaderboard-table {
+                min-width: 500px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .leaderboard-table {
+                min-width: 450px;
+            }
         }
 
         th, td {
@@ -149,6 +309,28 @@
             font-size: 1rem;
             position: sticky;
             top: 0;
+        }
+
+        /* Адаптивность ячеек таблицы */
+        @media (max-width: 768px) {
+            th, td {
+                padding: 12px 10px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            th, td {
+                padding: 8px 6px;
+                font-size: 0.85rem;
+            }
         }
 
         tr:hover {
@@ -166,9 +348,31 @@
         .rank-2 { color: #C0C0C0; }
         .rank-3 { color: #CD7F32; }
 
+        /* Адаптивность колонки с рангом */
+        @media (max-width: 480px) {
+            .rank {
+                font-size: 1rem;
+                width: 50px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .rank {
+                font-size: 0.95rem;
+                width: 45px;
+            }
+        }
+
         .participant-name {
             font-weight: bold;
             font-size: 1.05rem;
+        }
+
+        /* Адаптивность имени участника */
+        @media (max-width: 480px) {
+            .participant-name {
+                font-size: 1rem;
+            }
         }
 
         .loading {
@@ -192,6 +396,31 @@
             padding: 40px;
             font-size: 1.2rem;
             opacity: 0.8;
+        }
+
+        /* Адаптивность состояний загрузки и отсутствия данных */
+        @media (max-width: 768px) {
+            .loading, .no-data {
+                padding: 30px;
+                font-size: 1.1rem;
+            }
+            
+            .loading-spinner {
+                width: 35px;
+                height: 35px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .loading, .no-data {
+                padding: 25px;
+                font-size: 1rem;
+            }
+            
+            .loading-spinner {
+                width: 30px;
+                height: 30px;
+            }
         }
 
         .back-btn {
@@ -224,140 +453,50 @@
             width: 100%;
         }
 
+        /* Адаптивность кнопки возврата */
+        @media (max-width: 768px) {
+            .back-btn {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .back-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                max-width: 220px;
+            }
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        /* Адаптивность для планшетов */
-        @media (max-width: 768px) {
-            .container {
-                padding: 18px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .subtitle {
-                font-size: 1rem;
-            }
-            
-            th, td {
-                padding: 12px 10px;
-                font-size: 0.95rem;
-            }
-            
-            .leaderboard-type-selector {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .type-btn {
-                width: 100%;
-                max-width: 300px;
-            }
-            
-            .filters {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .filter-select {
-                width: 100%;
-                max-width: 300px;
-            }
-            
-            .category-selector {
-                width: 100%;
-            }
-            
-            .category-select {
-                width: 100%;
-                max-width: 300px;
-            }
-            
-            .leaderboard-table {
-                min-width: 550px;
+        /* Портретная ориентация на мобильных */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .table-container {
+                margin-left: -10px;
+                margin-right: -10px;
+                width: calc(100% + 20px);
             }
         }
 
-        /* Адаптивность для мобильных устройств */
-        @media (max-width: 480px) {
-            body {
-                padding: 15px;
-            }
-            
+        /* Ландшафтная ориентация на мобильных */
+        @media (max-width: 768px) and (orientation: landscape) {
             .container {
                 padding: 15px;
-                border-radius: 12px;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .subtitle {
-                font-size: 0.95rem;
-                margin-bottom: 15px;
-            }
-            
-            header {
-                margin-bottom: 20px;
             }
             
             .leaderboard-type-selector {
-                margin-bottom: 15px;
+                flex-direction: row;
+                gap: 10px;
             }
             
-            .filters {
-                margin-bottom: 15px;
-            }
-            
-            .filter-select {
-                padding: 8px 12px;
-                font-size: 0.95rem;
-                min-width: 120px;
-            }
-            
-            .table-container {
-                margin-top: 15px;
-                border-radius: 8px;
-            }
-            
-            .leaderboard-table {
-                min-width: 500px;
-                font-size: 0.9rem;
-            }
-            
-            th, td {
-                padding: 10px 8px;
-                font-size: 0.9rem;
-            }
-            
-            .rank {
-                font-size: 1rem;
-                width: 50px;
-            }
-            
-            .participant-name {
-                font-size: 1rem;
-            }
-            
-            .loading {
-                padding: 30px;
-                font-size: 1.1rem;
-            }
-            
-            .no-data {
-                padding: 30px;
-                font-size: 1.1rem;
-            }
-            
-            .back-btn {
-                padding: 10px 20px;
-                font-size: 0.95rem;
-                margin-top: 20px;
+            .type-btn {
+                min-width: 150px;
             }
         }
     </style>
@@ -441,10 +580,11 @@
 
     <script>
         // URL скрипта Google Apps
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbz1J59eDpOi8cFIPjApFUy98sqJuJMbF2c97xm2Ecjv88yEbxbN7B8wzk-ptXXfwGMl/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbx2Lru53tCgMMZkAokfyoeoOc8qRTVQuMKX09fmdGWIOPy3udHral5iH0H0k6E77UAK/exec';
 
         // Текущий тип лидерборда
         let currentLeaderboardType = 'overall';
+        let currentData = []; // Сохраняем загруженные данные
 
         // Функция для загрузки общего лидерборда
         async function loadOverallLeaderboard() {
@@ -459,6 +599,9 @@
                 const tableHeader = document.getElementById('tableHeader');
                 
                 if (data && data.length > 0) {
+                    // Сохраняем данные для фильтрации
+                    currentData = data;
+                    
                     // Устанавливаем заголовки для общего зачета
                     tableHeader.innerHTML = `
                         <th class="rank">Место</th>
@@ -486,16 +629,23 @@
                     
                     loading.style.display = 'none';
                     table.style.display = 'table';
+                    noData.style.display = 'none';
                     
-                    // Заполняем фильтры
-                    populateFilters(data);
+                    // Заполняем фильтры только один раз
+                    if (document.getElementById('networkFilter').children.length <= 1) {
+                        populateFilters(data);
+                    }
                 } else {
                     loading.style.display = 'none';
+                    table.style.display = 'none';
                     noData.style.display = 'block';
+                    currentData = [];
                 }
             } catch (error) {
                 console.error('Ошибка загрузки данных:', error);
-                document.getElementById('loading').innerHTML = '<p>Ошибка загрузки данных</p>';
+                const loading = document.getElementById('loading');
+                loading.innerHTML = '<p>Ошибка загрузки данных</p>';
+                currentData = [];
             }
         }
 
@@ -553,7 +703,7 @@
             }
         }
 
-        // Функция для заполнения фильтров
+        // Функция для заполнения фильтров (вызывается только один раз)
         function populateFilters(data) {
             const networks = [...new Set(data.map(p => p.network))].filter(n => n);
             const cities = [...new Set(data.map(p => p.city))].filter(c => c);
@@ -561,6 +711,20 @@
             const networkFilter = document.getElementById('networkFilter');
             const cityFilter = document.getElementById('cityFilter');
             
+            // Очищаем только если фильтры уже заполнены
+            if (networkFilter.children.length > 1) {
+                // Сохраняем первый элемент (опцию "Все сети")
+                const firstNetworkOption = networkFilter.children[0];
+                networkFilter.innerHTML = '';
+                networkFilter.appendChild(firstNetworkOption);
+                
+                // Сохраняем первый элемент (опцию "Все города")
+                const firstCityOption = cityFilter.children[0];
+                cityFilter.innerHTML = '';
+                cityFilter.appendChild(firstCityOption);
+            }
+            
+            // Добавляем уникальные сети
             networks.forEach(network => {
                 const option = document.createElement('option');
                 option.value = network;
@@ -568,6 +732,7 @@
                 networkFilter.appendChild(option);
             });
             
+            // Добавляем уникальные города
             cities.forEach(city => {
                 const option = document.createElement('option');
                 option.value = city;
@@ -582,21 +747,47 @@
 
         // Функция для фильтрации таблицы
         function filterLeaderboard() {
-            if (currentLeaderboardType !== 'overall') return;
+            if (currentLeaderboardType !== 'overall' || currentData.length === 0) return;
             
             const networkFilter = document.getElementById('networkFilter').value;
             const cityFilter = document.getElementById('cityFilter').value;
-            const rows = document.querySelectorAll('#leaderboardBody tr');
+            const tbody = document.getElementById('leaderboardBody');
             
-            rows.forEach(row => {
-                const network = row.cells[4].textContent;
-                const city = row.cells[3].textContent;
-                
-                const networkMatch = !networkFilter || network === networkFilter;
-                const cityMatch = !cityFilter || city === cityFilter;
-                
-                row.style.display = (networkMatch && cityMatch) ? '' : 'none';
+            // Очищаем таблицу
+            tbody.innerHTML = '';
+            
+            // Фильтруем данные
+            const filteredData = currentData.filter(participant => {
+                const networkMatch = !networkFilter || participant.network === networkFilter;
+                const cityMatch = !cityFilter || participant.city === cityFilter;
+                return networkMatch && cityMatch;
             });
+            
+            // Заполняем таблицу отфильтрованными данными
+            filteredData.forEach((participant, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="rank rank-${index + 1}">${index + 1}</td>
+                    <td class="participant-name">${participant.participant}</td>
+                    <td>${participant.participantRole}</td>
+                    <td>${participant.city}</td>
+                    <td>${participant.network}</td>
+                    <td>${participant.totalTime}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Показываем сообщение, если нет данных после фильтрации
+            const table = document.getElementById('leaderboardTable');
+            const noData = document.getElementById('noData');
+            
+            if (filteredData.length === 0) {
+                table.style.display = 'none';
+                noData.style.display = 'block';
+            } else {
+                table.style.display = 'table';
+                noData.style.display = 'none';
+            }
         }
 
         // Функция для переключения типа лидерборда
@@ -616,6 +807,12 @@
                 overallBtn.classList.add('active');
                 filters.style.display = 'flex';
                 categorySelector.style.display = 'none';
+                
+                // Сбрасываем фильтры при переключении на общий зачет
+                document.getElementById('networkFilter').value = '';
+                document.getElementById('cityFilter').value = '';
+                
+                // Загружаем общий зачет
                 loadOverallLeaderboard();
             } else {
                 categoryBtn.classList.add('active');
@@ -626,10 +823,15 @@
                 const table = document.getElementById('leaderboardTable');
                 const tbody = document.getElementById('leaderboardBody');
                 const noData = document.getElementById('noData');
+                const loading = document.getElementById('loading');
                 
                 table.style.display = 'none';
                 tbody.innerHTML = '';
                 noData.style.display = 'none';
+                loading.style.display = 'none';
+                
+                // Сбрасываем выбор категории
+                document.getElementById('categoryFilter').value = '';
             }
         }
 
