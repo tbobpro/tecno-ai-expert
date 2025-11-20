@@ -23,6 +23,7 @@ let cardFlippedInRound = false;
 let gameStartTime = null;
 let totalGameTime = 0;
 let completedTasksCount = 0;
+let feedback = '';
 
 // Тексты карточек
 const allCardTexts = [
@@ -51,27 +52,27 @@ const allCardTexts = [
 
 // Пояснения к карточкам
 window.cardExplanations = {
-    "Ассистент Ella (Где найти помощника)": "Пояснение для карточки 'Ассистент Ella (Где найти помощника)'...",
-    "Ассистент Ella (Умный поиск)": "Пояснение для карточки 'Ассистент Ella (Умный поиск)'...",
-    "Помощник по работе с документами": "Пояснение для карточки 'Помощник по работе с документами'...",
-    "Редактор AI": "Пояснение для карточки 'Редактор AI'...",
-    "Работа с документами (Картинка в документ)": "Пояснение для карточки 'Работа с документами (Картинка в документ)'...",
-    "Работа с документами (Расшифровка записей диктофона)": "Пояснение для карточки 'Работа с документами (Расшифровка записей диктофона)'...",
-    "Круг для поиска": "Пояснение для карточки 'Круг для поиска'...",
-    "Интеграция с сервисами Яндекс": "Пояснение для карточки 'Интеграция с сервисами Яндекс'...",
-    "Решение математических задач": "Пояснение для карточки 'Решение математических задач'...",
-    "Студия AI (Удаление объекта с фотографии)": "Пояснение для карточки 'Студия AI (Удаление объекта с фотографии)'...",
-    "Студия AI (Расширение границ кадра)": "Пояснение для карточки 'Студия AI (Расширение границ кадра)'...",
-    "Студия AI (AI Доска для рисования)": "Пояснение для карточки 'Студия AI (AI Доска для рисования)'...",
-    "Студия AI (AI Генератор обоев)": "Пояснение для карточки 'Студия AI (AI Генератор обоев)'...",
-    "Студия AI (Улучшение групповых портретов)": "Пояснение для карточки 'Студия AI (Улучшение групповых портретов)'...",
-    "Умный переводчик (Перевод разговора)": "Пояснение для карточки 'Умный переводчик (Перевод разговора)'...",
-    "Умный переводчик (Синхронный перевод)": "Пояснение для карточки 'Умный переводчик (Синхронный перевод)'...",
-    "Умный переводчик (Перевод изображений)": "Пояснение для карточки 'Умный переводчик (Перевод изображений)'...",
-    "Телефонный помощник (Сводка и расшифровка звонков)": "Пояснение для карточки 'Телефонный помощник (Сводка и расшифровка звонков)'...",
-    "Телефонный помощник (Автоответчик AI)": "Пояснение для карточки 'Телефонный помощник (Автоответчик AI)'...",
-    "Телефонный помощник (Перевод звонков в реальном времени)": "Пояснение для карточки 'Телефонный помощник (Перевод звонков в реальном времени)'...",
-    "Телефонный помощник (ИИ Шумоподавление)": "Пояснение для карточки 'Телефонный помощник (ИИ Шумоподавление)'..."
+    "Ассистент Ella (Где найти помощника)": "Ассистент Ella доступен через иконку на главном экране или по долгому нажатию кнопки домой. Он помогает управлять устройством, находить информацию и выполнять команды.",
+    "Ассистент Ella (Умный поиск)": "Ella может искать информацию в интернете, приложениях и на устройстве. Просто спросите её о чём угодно, и она найдёт наиболее релевантные ответы.",
+    "Помощник по работе с документами": "ИИ помогает создавать, редактировать и форматировать документы. Может предлагать структуру, исправлять ошибки и оптимизировать содержание.",
+    "Редактор AI": "Интеллектуальный редактор для текстов, который может перефразировать, улучшать стиль, проверять грамматику и адаптировать текст под разные цели.",
+    "Работа с документами (Картинка в документ)": "Функция позволяет преобразовать изображение с текстом в редактируемый документ. Система распознает текст и сохраняет его в выбранном формате.",
+    "Работа с документами (Расшифровка записей диктофона)": "AI преобразует голосовые записи в текст с высокой точностью, распознавая разных говорящих и сохраняя структуру разговора.",
+    "Круг для поиска": "Инновационная функция поиска, где пользователь рисует круг вокруг интересующего объекта на экране, и система находит похожие или связанные элементы.",
+    "Интеграция с сервисами Яндекс": "Глубокая интеграция с экосистемой Яндекс, включая поиск, карты, музыку и другие сервисы для удобства пользователя.",
+    "Решение математических задач": "AI может решать математические задачи разных уровней сложности - от простых арифметических операций до сложных уравнений.",
+    "Студия AI (Удаление объекта с фотографии)": "Мощный инструмент для удаления нежелательных объектов с фотографий с сохранением естественного фона.",
+    "Студия AI (Расширение границ кадра)": "Функция позволяет увеличить размер фотографии, интеллектуально дорисовывая недостающие части изображения.",
+    "Студия AI (AI Доска для рисования)": "Интеллектуальный холст для рисования, где AI помогает создавать художественные работы, предлагая стили и улучшения.",
+    "Студия AI (AI Генератор обоев)": "Создание уникальных обоев для рабочего стола на основе предпочтений пользователя и текущих тенденций дизайна.",
+    "Студия AI (Улучшение групповых портретов)": "Автоматическое улучшение групповых фотографий - выравнивание лиц, улучшение качества и ретушь.",
+    "Умный переводчик (Перевод разговора)": "Режим перевода диалога между двумя людьми, говорящими на разных языках, с сохранением контекста разговора.",
+    "Умный переводчик (Синхронный перевод)": "Перевод речи в реальном времени с минимальной задержкой, идеально подходит для живого общения.",
+    "Умный переводчик (Перевод изображений)": "Распознавание и перевод текста на изображениях, фотографиях и в реальном времени через камеру.",
+    "Телефонный помощник (Сводка и расшифровка звонков)": "AI анализирует телефонные разговоры, создаёт краткие сводки и расшифровывает содержание звонков.",
+    "Телефонный помощник (Автоответчик AI)": "Интеллектуальный автоответчик, который может вести осмысленные диалоги с звонящими и передавать важную информацию.",
+    "Телефонный помощник (Перевод звонков в реальном времени)": "Перевод телефонных разговоров в реальном времени, позволяя общаться с людьми на разных языках.",
+    "Телефонный помощник (ИИ Шумоподавление)": "Продвинутая система шумоподавления, которая очищает голос собеседника от фоновых шумов во время звонков."
 };
 
 // URL скрипта Google Apps
@@ -103,6 +104,8 @@ function initializeEventListeners() {
     const closeExplanationBtn = document.getElementById('closeExplanationBtn');
     const skipFromExplanationBtn = document.getElementById('skipFromExplanationBtn');
     const leaderboardBtn = document.getElementById('leaderboardBtn');
+    const leaderboardBtnFromModal = document.getElementById('leaderboardBtnFromModal');
+    const submitFeedbackBtn = document.getElementById('submitFeedbackBtn');
 
     // Назначаем обработчики событий
     if (startBtn) startBtn.addEventListener('click', startTimer);
@@ -115,6 +118,8 @@ function initializeEventListeners() {
     if (closeExplanationBtn) closeExplanationBtn.addEventListener('click', handleCloseExplanation);
     if (skipFromExplanationBtn) skipFromExplanationBtn.addEventListener('click', handleSkipFromExplanation);
     if (leaderboardBtn) leaderboardBtn.addEventListener('click', handleLeaderboard);
+    if (leaderboardBtnFromModal) leaderboardBtnFromModal.addEventListener('click', handleLeaderboardFromModal);
+    if (submitFeedbackBtn) submitFeedbackBtn.addEventListener('click', handleSubmitFeedback);
 }
 
 // Функция для получения локального времени в формате строки
@@ -271,8 +276,8 @@ function resetTimer() {
 function saveGameResultsToFile() {
     if (gameResults.length === 0) return;
     
-    // Создаем CSV содержимое
-    let csvContent = "Дата проведения игры,Время проведения раунда,Раунд,Участник,Должность участника,Ведущий,Карточка,Время,Статус,Комментарий,Сеть,Город,Адрес магазина,Код точки\n";
+    // Создаем CSV содержимое с обратной связью
+    let csvContent = "Дата проведения игры,Время проведения раунда,Раунд,Участник,Должность участника,Ведущий,Карточка,Время,Статус,Комментарий,Сеть,Город,Адрес магазина,Код точки,Обратная связь\n";
     
     gameResults.forEach(result => {
         const row = [
@@ -289,13 +294,14 @@ function saveGameResultsToFile() {
             `"${result.network}"`,
             `"${result.city}"`,
             `"${result.storeAddress}"`,
-            `"${result.storeCode}"`
+            `"${result.storeCode}"`,
+            "" // Обратная связь для отдельных раундов не заполняется
         ].join(',');
         
         csvContent += row + '\n';
     });
     
-    // Добавляем итоговую строку
+    // Добавляем итоговую строку с обратной связью
     const lastResult = gameResults[gameResults.length - 1];
     const summaryRow = [
         lastResult.gameDate,
@@ -311,7 +317,8 @@ function saveGameResultsToFile() {
         `"${lastResult.network}"`,
         `"${lastResult.city}"`,
         `"${lastResult.storeAddress}"`,
-        `"${lastResult.storeCode}"`
+        `"${lastResult.storeCode}"`,
+        `"${feedback}"` // Добавляем обратную связь
     ].join(',');
     
     csvContent += summaryRow + '\n';
@@ -415,6 +422,7 @@ function sendSummaryToGoogleSheets() {
     const formSummaryTimestamp = document.getElementById('form-summary-timestamp');
     const formSummaryCompletedCount = document.getElementById('form-summary-completed-count');
     const formSummaryTotalTime = document.getElementById('form-summary-total-time');
+    const formSummaryFeedback = document.getElementById('form-summary-feedback');
     const summaryForm = document.getElementById('submit-summary-to-google-sheet');
     
     if (!summaryForm) return;
@@ -430,6 +438,7 @@ function sendSummaryToGoogleSheets() {
     if (formSummaryTimestamp) formSummaryTimestamp.value = getLocalTimestamp();
     if (formSummaryCompletedCount) formSummaryCompletedCount.value = completedTasksCount;
     if (formSummaryTotalTime) formSummaryTotalTime.value = formatTime(totalGameTime);
+    if (formSummaryFeedback) formSummaryFeedback.value = feedback;
     
     // Отправляем форму
     fetch(scriptURL, { 
@@ -554,11 +563,24 @@ function endGame() {
         card.style.cursor = 'not-allowed';
     });
     
-    // Сохраняем результаты в файл
-    saveGameResultsToFile();
-    
-    // Отправляем итоговые данные в Google Таблицы
-    sendSummaryToGoogleSheets();
+    // Показываем модальное окно обратной связи вместо немедленного сохранения
+    showFeedbackModal();
+}
+
+// Функция для показа модального окна обратной связи
+function showFeedbackModal() {
+    const feedbackModal = document.getElementById('feedbackModal');
+    if (feedbackModal) {
+        feedbackModal.style.display = 'flex';
+    }
+}
+
+// Функция для скрытия модального окна обратной связи
+function hideFeedbackModal() {
+    const feedbackModal = document.getElementById('feedbackModal');
+    if (feedbackModal) {
+        feedbackModal.style.display = 'none';
+    }
 }
 
 // Обработчики событий
@@ -649,4 +671,26 @@ function handleSkipFromExplanation() {
 
 function handleLeaderboard() {
     window.open('leaderboard.html', '_blank');
+}
+
+function handleLeaderboardFromModal() {
+    window.open('leaderboard.html', '_blank');
+}
+
+function handleSubmitFeedback() {
+    const feedbackInput = document.getElementById('feedback');
+    if (feedbackInput) {
+        feedback = feedbackInput.value.trim();
+        
+        // Сохраняем результаты в файл (с обратной связью)
+        saveGameResultsToFile();
+        
+        // Отправляем итоговые данные в Google Таблицы (с обратной связью)
+        sendSummaryToGoogleSheets();
+        
+        hideFeedbackModal();
+        
+        // Показываем сообщение об успешном завершении
+        alert('Игра завершена! Результаты сохранены.');
+    }
 }
