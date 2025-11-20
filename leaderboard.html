@@ -499,6 +499,43 @@
                 min-width: 150px;
             }
         }
+
+        .refresh-btn {
+    background: linear-gradient(45deg, #4CAF50 0%, #45a049 100%);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    margin-top: 10px;
+}
+
+.refresh-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.refresh-btn:active {
+    transform: translateY(0);
+}
+
+/* Адаптивность для кнопки обновления */
+@media (max-width: 768px) {
+    .refresh-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .refresh-btn {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+}
     </style>
 </head>
 <body>
