@@ -480,3 +480,24 @@ textarea {
         grid-template-columns: 1fr;
     }
 }
+
+/* Дополнительные стили для модального окна ввода данных */
+.game-title-modal {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 2rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.modal-subtitle {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+    opacity: 0.9;
+}
+
+/* Стили для кнопки лидерборда в модальном окне */
+#leaderboardBtnFromModal {
+    background: linear-gradient(45deg, #FFD700 0%, #FFA500 100%);
+    margin-top: 10px;
+}
