@@ -1,7 +1,7 @@
 // leaderboard.js - Исправленная логика для таблицы лидеров
 
 // URL скрипта Google Apps
-const scriptURL = 'https://script.google.com/macros/s/AKfycbz1J59eDpOi8cFIPjApFUy98sqJuJMbF2c97xm2Ecjv88yEbxbN7B8wzk-ptXXfwGMl/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbztalHgLIhd6gDzmySOaG3VlRnOdB_OwyoH3vfjs7Gbf2b3NJqNFKFJp21Kv10IUt2O/exec';
 
 // Текущий тип лидерборда
 let currentLeaderboardType = 'overall';
