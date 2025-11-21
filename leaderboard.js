@@ -348,3 +348,52 @@ document.addEventListener('DOMContentLoaded', function() {
     // Добавляем кнопку обновления в интерфейс
     addRefreshButton();
 });
+
+
+// Функция для закрытия вкладки
+function closeTab() {
+    // Пытаемся закрыть вкладку
+    if (window.history.length > 1) {
+        // Если есть история, возвращаемся назад
+        window.history.back();
+    } else {
+        // Если нет истории, пытаемся закрыть вкладку
+        window.close();
+        
+        // Если вкладка не закрылась (например, из-за политики браузера),
+        // показываем сообщение и предлагаем закрыть вручную
+        setTimeout(function() {
+            if (!window.closed) {
+                alert('Вкладка не может быть закрыта автоматически. Пожалуйста, закройте её вручную.');
+            }
+        }, 100);
+    }
+}
+
+// Обновите обработчик DOMContentLoaded в leaderboard.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Загружаем общий лидерборд по умолчанию
+    loadOverallLeaderboard();
+    
+    // Обработчики для переключения типа лидерборда
+    document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.getAttribute('data-type');
+            switchLeaderboardType(type);
+        });
+    });
+    
+    // Обработчик для выбора категории
+    document.getElementById('categoryFilter').addEventListener('change', function() {
+        const category = this.value;
+        if (category) {
+            loadCategoryLeaderboard(category);
+        }
+    });
+
+    // Добавляем кнопку обновления в интерфейс
+    addRefreshButton();
+    
+    // ОБРАБОТЧИК ДЛЯ КНОПКИ ЗАКРЫТИЯ ВКЛАДКИ
+    document.getElementById('closeTabBtn').addEventListener('click', closeTab);
+});
