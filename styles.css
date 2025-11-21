@@ -521,3 +521,27 @@ textarea {
     transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
+
+/* Стили для кнопки "Заново" */
+#restartGameBtn {
+    background: linear-gradient(45deg, #4CAF50 0%, #45a049 100%);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+#restartGameBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Стили для модального окна секретного входа */
+#secretLoginModal .modal-content {
+    max-width: 400px;
+}
