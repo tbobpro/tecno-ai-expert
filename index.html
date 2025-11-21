@@ -50,6 +50,10 @@
                 <label for="storeCode">Код точки:</label>
                 <input type="text" id="storeCode" placeholder="Введите код точки">
             </div>
+            <div class="form-group confirmation-checkbox">
+    <input type="checkbox" id="dataConfirmation" required>
+    <label for="dataConfirmation">Подтверждаю, что введённые мною (ведущим) данные являются полностью верными.</label>
+</div>
             <div class="modal-buttons">
                 <button id="startGameBtn">Начать игру</button>
             </div>
@@ -94,7 +98,7 @@
             <h2>Обратная связь от ведущего</h2>
             <div class="form-group">
                 <label for="feedback">Комментарии и впечатления от игры:</label>
-                <textarea id="feedback" placeholder="Опишите ваши впечатления от игры, поведение участника, сложности и т.д."></textarea>
+                <textarea id="feedback" placeholder="Опишите ваши впечатления от игры, поведение участника, сложности и т.д." required></textarea>
             </div>
             <div class="modal-buttons">
                 <button id="submitFeedbackBtn">Отправить и завершить</button>
