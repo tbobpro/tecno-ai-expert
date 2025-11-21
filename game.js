@@ -25,6 +25,11 @@ let totalGameTime = 0;
 let completedTasksCount = 0;
 let feedback = '';
 
+// Переменные для тестового режима
+let isTestMode = false;
+let secretClickCount = 0;
+let secretClickTimeout = null;
+
 // Тексты карточек
 const allCardTexts = [
     "Ассистент Ella (Где найти помощника)",
@@ -120,6 +125,177 @@ function initializeEventListeners() {
     if (leaderboardBtn) leaderboardBtn.addEventListener('click', handleLeaderboard);
     if (leaderboardBtnFromModal) leaderboardBtnFromModal.addEventListener('click', handleLeaderboardFromModal);
     if (submitFeedbackBtn) submitFeedbackBtn.addEventListener('click', handleSubmitFeedback);
+
+    // Новые обработчики для секретного входа
+    const secretTrigger = document.getElementById('secretTrigger');
+    const secretLoginBtn = document.getElementById('secretLoginBtn');
+    const cancelSecretLoginBtn = document.getElementById('cancelSecretLoginBtn');
+    const restartGameBtn = document.getElementById('restartGameBtn');
+
+    if (secretTrigger) {
+        secretTrigger.addEventListener('click', handleSecretTriggerClick);
+    }
+    if (secretLoginBtn) {
+        secretLoginBtn.addEventListener('click', handleSecretLogin);
+    }
+    if (cancelSecretLoginBtn) {
+        cancelSecretLoginBtn.addEventListener('click', hideSecretLoginModal);
+    }
+    if (restartGameBtn) {
+        restartGameBtn.addEventListener('click', restartGame);
+    }
+}
+
+// Функция для обработки кликов по скрытой кнопке
+function handleSecretTriggerClick() {
+    secretClickCount++;
+    
+    // Сбрасываем таймер при каждом клике
+    if (secretClickTimeout) {
+        clearTimeout(secretClickTimeout);
+    }
+    
+    // Устанавливаем таймер для сброса счетчика (5 секунд)
+    secretClickTimeout = setTimeout(() => {
+        secretClickCount = 0;
+    }, 5000);
+    
+    // Если нажали 5 раз, показываем модальное окно
+    if (secretClickCount >= 5) {
+        showSecretLoginModal();
+        secretClickCount = 0; // Сбрасываем счетчик
+    }
+}
+
+// Функция для обработки скрытого входа
+function handleSecretLogin() {
+    const password = document.getElementById('secretPassword').value;
+    if (password === '55555') {
+        // Генерируем случайные данные
+        const randomData = generateRandomData();
+        
+        // Заполняем поля формы
+        participantName = randomData.participant;
+        participantRole = randomData.participantRole;
+        hostName = randomData.host;
+        network = randomData.network;
+        city = randomData.city;
+        storeAddress = randomData.storeAddress;
+        storeCode = randomData.storeCode;
+        
+        // Устанавливаем тестовый режим
+        isTestMode = true;
+        
+        // Скрываем модальные окна
+        hideSecretLoginModal();
+        hideNamesModal();
+        
+        // Запускаем игру
+        gameStarted = true;
+        gameStartTime = new Date();
+        const roundInfo = document.getElementById('roundInfo');
+        if (roundInfo) roundInfo.style.display = 'block';
+        createCards();
+        
+        // Показываем информацию о тестовом режиме
+        alert('Тестовый режим активирован! Данные заполнены автоматически.');
+    } else {
+        alert('Неверный пароль!');
+    }
+}
+
+// Функции для управления модальным окном секретного входа
+function showSecretLoginModal() {
+    const modal = document.getElementById('secretLoginModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.getElementById('secretPassword').value = '';
+        document.getElementById('secretPassword').focus();
+    }
+}
+
+function hideSecretLoginModal() {
+    const modal = document.getElementById('secretLoginModal');
+    if (modal) {
+        modal.style.display = 'none';
+        secretClickCount = 0; // Сбрасываем счетчик
+    }
+}
+
+// Функция для перезапуска игры в тестовом режиме
+function restartGame() {
+    if (!isTestMode) return;
+    
+    // Генерируем новые случайные данные
+    const randomData = generateRandomData();
+    
+    // Обновляем глобальные переменные
+    participantName = randomData.participant;
+    participantRole = randomData.participantRole;
+    hostName = randomData.host;
+    network = randomData.network;
+    city = randomData.city;
+    storeAddress = randomData.storeAddress;
+    storeCode = randomData.storeCode;
+    
+    // Сбрасываем состояние игры
+    resetGameState();
+    
+    // Скрываем результаты и кнопку перезапуска
+    const resultsTable = document.getElementById('resultsTable');
+    const summaryResults = document.getElementById('summaryResults');
+    const restartContainer = document.getElementById('restartGameContainer');
+    
+    if (resultsTable) resultsTable.style.display = 'none';
+    if (summaryResults) summaryResults.style.display = 'none';
+    if (restartContainer) restartContainer.style.display = 'none';
+    
+    // Запускаем новую игру
+    gameStarted = true;
+    gameStartTime = new Date();
+    createCards();
+    
+    // Показываем информацию о новых данных
+    alert(`Новая игра! Участник: ${participantName}, Город: ${city}, Адрес: ${storeAddress}`);
+}
+
+// Функция для полного сброса состояния игры
+function resetGameState() {
+    timerInterval = null;
+    startTime = null;
+    elapsedTime = 0;
+    isRunning = false;
+    currentRound = 1;
+    gameStarted = false;
+    gameEnded = false;
+    currentCardText = '';
+    gameResults = [];
+    usedCardTexts = [];
+    cardFlippedInRound = false;
+    gameStartTime = null;
+    totalGameTime = 0;
+    completedTasksCount = 0;
+    feedback = '';
+    
+    // Сбрасываем UI
+    resetTimer();
+    
+    const currentRoundDisplay = document.getElementById('currentRound');
+    if (currentRoundDisplay) currentRoundDisplay.textContent = '1';
+    
+    const resultsBody = document.getElementById('resultsBody');
+    if (resultsBody) resultsBody.innerHTML = '';
+    
+    const cardsGrid = document.getElementById('cardsGrid');
+    if (cardsGrid) cardsGrid.innerHTML = '';
+    
+    // Разблокируем карточки
+    const allCards = document.querySelectorAll('.card');
+    allCards.forEach(card => {
+        card.classList.remove('flipped', 'disabled', 'game-ended');
+        card.style.opacity = '1';
+        card.style.cursor = 'pointer';
+    });
 }
 
 // Функция для получения локального времени в формате строки
@@ -603,7 +779,6 @@ function completeRound(status, comment = '') {
     currentCardText = '';
 }
 
-
 // Функция для добавления результата в таблицу
 function addResultToTable(result) {
     const resultsBody = document.getElementById('resultsBody');
@@ -652,6 +827,14 @@ function endGame() {
         card.style.opacity = '0.6';
         card.style.cursor = 'not-allowed';
     });
+    
+    // Показываем кнопку "Заново" в тестовом режиме
+    if (isTestMode) {
+        const restartContainer = document.getElementById('restartGameContainer');
+        if (restartContainer) {
+            restartContainer.style.display = 'block';
+        }
+    }
     
     // Показываем модальное окно обратной связи вместо немедленного сохранения
     showFeedbackModal();
