@@ -8,6 +8,7 @@ let currentLeaderboardType = 'overall';
 let currentData = []; // Сохраняем загруженные данные
 let cachedOverallData = null; // Кэш для общего зачета
 let isInitialLoad = true; // Флаг первой загрузки
+let refreshButtonAdded = false; // Флаг для отслеживания добавления кнопки
 
 // Функция для отрисовки общего лидерборда
 function renderOverallLeaderboard(data) {
@@ -288,9 +289,21 @@ function refreshLeaderboard() {
     }
 }
 
-// Функция для добавления кнопки обновления
+// Функция для добавления кнопки обновления (исправленная)
 function addRefreshButton() {
+    // Проверяем, не добавлена ли уже кнопка
+    if (refreshButtonAdded) {
+        return;
+    }
+    
     const header = document.querySelector('header');
+    
+    // Проверяем, существует ли уже кнопка обновления
+    if (header.querySelector('.refresh-btn')) {
+        refreshButtonAdded = true;
+        return;
+    }
+    
     const refreshBtn = document.createElement('button');
     refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Обновить';
     refreshBtn.className = 'refresh-btn';
@@ -308,6 +321,7 @@ function addRefreshButton() {
     refreshBtn.addEventListener('click', refreshLeaderboard);
     
     header.appendChild(refreshBtn);
+    refreshButtonAdded = true;
 
     // Адаптивность для мобильных
     const mediaQuery = window.matchMedia('(max-width: 768px)');
@@ -323,32 +337,6 @@ function addRefreshButton() {
     mediaQuery.addListener(handleMobileChange);
     handleMobileChange(mediaQuery);
 }
-
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    // Загружаем общий лидерборд по умолчанию
-    loadOverallLeaderboard();
-    
-    // Обработчики для переключения типа лидерборда
-    document.querySelectorAll('.type-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const type = this.getAttribute('data-type');
-            switchLeaderboardType(type);
-        });
-    });
-    
-    // Обработчик для выбора категории
-    document.getElementById('categoryFilter').addEventListener('change', function() {
-        const category = this.value;
-        if (category) {
-            loadCategoryLeaderboard(category);
-        }
-    });
-
-    // Добавляем кнопку обновления в интерфейс
-    addRefreshButton();
-});
-
 
 // Функция для закрытия вкладки
 function closeTab() {
@@ -370,7 +358,7 @@ function closeTab() {
     }
 }
 
-// Обновите обработчик DOMContentLoaded в leaderboard.js
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     // Загружаем общий лидерборд по умолчанию
     loadOverallLeaderboard();
