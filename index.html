@@ -53,6 +53,9 @@
             <div class="modal-buttons">
                 <button id="startGameBtn">Начать игру</button>
             </div>
+
+            <!-- Скрытая кнопка для тестового входа -->
+            <div id="secretTrigger" style="position: absolute; bottom: 10px; right: 10px; width: 60px; height: 60px; opacity: 0.01; cursor: pointer; z-index: 1000;"></div>
         </div>
     </div>
 
@@ -95,6 +98,21 @@
             </div>
             <div class="modal-buttons">
                 <button id="submitFeedbackBtn">Отправить и завершить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для секретного входа -->
+    <div id="secretLoginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Секретный вход</h2>
+            <div class="form-group">
+                <label for="secretPassword">Пароль:</label>
+                <input type="password" id="secretPassword" placeholder="Введите пароль">
+            </div>
+            <div class="modal-buttons">
+                <button id="secretLoginBtn">Войти</button>
+                <button id="cancelSecretLoginBtn">Отмена</button>
             </div>
         </div>
     </div>
@@ -199,6 +217,13 @@
                     <p>Общее время: <span id="totalTime">00:00.00</span></p>
                 </div>
             </div>
+
+            <!-- Кнопка "Заново" для тестового режима -->
+            <div id="restartGameContainer" style="display: none; margin-top: 20px;">
+                <button id="restartGameBtn" style="background: linear-gradient(45deg, #4CAF50 0%, #45a049 100%);">
+                    <i class="fas fa-redo"></i> Заново
+                </button>
+            </div>
         </div>
 
         <footer>
@@ -210,6 +235,5 @@
     <script src="modals.js"></script>
     <script src="random-data.js"></script>
     <script src="game.js"></script>
-    
 </body>
 </html>
