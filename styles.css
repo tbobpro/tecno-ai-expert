@@ -8,7 +8,7 @@
 }
 
 body {
-    background: linear-gradient(135deg, rgba(106, 17, 203, 0.8) 0%, rgba(37, 117, 252, 0.8) 100%), url('background.png') no-repeat center center fixed;
+    background: linear-gradient(135deg, rgba(106, 17, 203, 0.8) 0%, rgba(37, 117, 252, 0.8) 100%), url('background.png') no-repeat center center;
     background-size: cover;
     min-height: 100vh;
     display: flex;
@@ -425,7 +425,7 @@ textarea {
     }
     
     body {
-        background: linear-gradient(135deg, rgba(106, 17, 203, 0.8) 0%, rgba(37, 117, 252, 0.8) 100%), url('background-mobile.jpg') no-repeat center center fixed;
+        background: linear-gradient(135deg, rgba(106, 17, 203, 0.8) 0%, rgba(37, 117, 252, 0.8) 100%), url('background-mobile.jpg') no-repeat center center;
         background-size: cover;
     }
     
