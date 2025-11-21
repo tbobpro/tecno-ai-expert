@@ -744,6 +744,9 @@ function handleCancelSkip() {
     hideSkipModal();
     const skipReasonInput = document.getElementById('skipReason');
     if (skipReasonInput) skipReasonInput.value = '';
+    
+    // ВОЗВРАЩАЕМ ПОЛЬЗОВАТЕЛЯ К ПОЯСНЕНИЮ КАРТОЧКИ
+    showExplanationModal(currentCardText);
 }
 
 function handleCloseExplanation() {
