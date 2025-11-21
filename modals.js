@@ -18,9 +18,14 @@ function showNamesModal() {
     if (namesModal) {
         namesModal.style.display = 'flex';
         if (body) body.classList.add('modal-open');
+        
+        // Сбрасываем чекбокс подтверждения
+        const confirmationCheckbox = document.getElementById('dataConfirmation');
+        if (confirmationCheckbox) {
+            confirmationCheckbox.checked = false;
+        }
     }
 }
-
 // Функция для скрытия модального окна ввода данных
 function hideNamesModal() {
     if (namesModal) {
