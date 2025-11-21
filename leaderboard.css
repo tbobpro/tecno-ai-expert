@@ -529,3 +529,44 @@ tr:hover {
         min-width: 150px;
     }
 }
+
+/* Стили для кнопки закрытия вкладки */
+#closeTabBtn {
+    background: linear-gradient(45deg, #ff6b6b 0%, #ff8e8e 100%);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: white;
+    margin-top: 25px;
+    text-align: center;
+    width: 100%;
+    max-width: 250px;
+}
+
+#closeTabBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(45deg, #ff5252 0%, #ff7b7b 100%);
+}
+
+/* Адаптивность кнопки закрытия вкладки */
+@media (max-width: 768px) {
+    #closeTabBtn {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    #closeTabBtn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        max-width: 220px;
+    }
+}
