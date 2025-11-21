@@ -253,11 +253,13 @@ button:disabled {
     max-width: 600px;
     margin-top: 20px;
     display: none;
+    overflow-x: auto; /* Добавляем горизонтальную прокрутку */
 }
 
-table {
+.results-table table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 500px; /* Минимальная ширина таблицы */
 }
 
 th, td {
@@ -522,26 +524,117 @@ textarea {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Стили для кнопки "Заново" */
-#restartGameBtn {
-    background: linear-gradient(45deg, #4CAF50 0%, #45a049 100%);
-    border: none;
-    padding: 12px 25px;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: bold;
+/* Исправления для модального окна пояснения */
+#explanationModal .modal-buttons.two-column {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+#explanationModal .modal-buttons.two-column button {
+    flex: 1;
+    max-width: 140px;
+}
+
+/* Исправления для таблицы результатов на мобильных */
+.results-table {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+    display: none;
+    overflow-x: auto; /* Добавляем горизонтальную прокрутку */
+}
+
+.results-table table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px; /* Минимальная ширина таблицы */
+}
+
+/* Стили для чекбокса подтверждения */
+.confirmation-checkbox {
+    margin: 20px 0;
+    text-align: left;
+    display: flex;
+    align-items: center; /* Выравнивание по центру */
+    gap: 10px;
+    flex-wrap: nowrap; /* Запрещаем перенос на новую строку */
+}
+
+.confirmation-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0; /* Убираем верхний отступ */
+    flex-shrink: 0;
+}
+
+.confirmation-checkbox label {
+    font-size: 0.9rem;
+    line-height: 1.4;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    color: white;
+    user-select: none;
+    margin: 0; /* Убираем отступы */
+    white-space: normal; /* Разрешаем перенос текста */
 }
 
-#restartGameBtn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+/* Стили для обязательных полей */
+input:required, textarea:required {
+    border-left: 3px solid #ff6b6b;
 }
 
-/* Стили для модального окна секретного входа */
-#secretLoginModal .modal-content {
-    max-width: 400px;
+input:valid, textarea:valid {
+    border-left: 3px solid #51cf66;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .results-table {
+        margin-left: -10px;
+        margin-right: -10px;
+        width: calc(100% + 20px);
+        border-radius: 0;
+        padding: 10px;
+    }
+    
+    .results-table table {
+        min-width: 400px;
+        font-size: 0.9rem;
+    }
+    
+    .results-table th,
+    .results-table td {
+        padding: 8px 6px;
+        font-size: 0.85rem;
+    }
+    
+    /* Адаптивность для чекбокса на мобильных */
+    .confirmation-checkbox {
+        align-items: flex-start; /* На маленьких экранах выравниваем по верху */
+    }
+    
+    .confirmation-checkbox label {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+    
+    /* Улучшение отображения на очень маленьких экранах */
+    @media (max-width: 480px) {
+        .results-table table {
+            min-width: 350px;
+        }
+        
+        .results-table th,
+        .results-table td {
+            padding: 6px 4px;
+            font-size: 0.8rem;
+        }
+        
+        .confirmation-checkbox label {
+            font-size: 0.8rem;
+        }
+    }
 }
