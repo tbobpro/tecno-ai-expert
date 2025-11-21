@@ -882,9 +882,10 @@ function handleStartGame() {
     const cityInput = document.getElementById('city');
     const storeAddressInput = document.getElementById('storeAddress');
     const storeCodeInput = document.getElementById('storeCode');
+    const confirmationCheckbox = document.getElementById('dataConfirmation');
     
     if (!participantNameInput || !participantRoleInput || !hostNameInput || 
-        !networkInput || !cityInput || !storeAddressInput || !storeCodeInput) {
+        !networkInput || !cityInput || !storeAddressInput || !storeCodeInput || !confirmationCheckbox) {
         alert('Ошибка: не все поля формы найдены.');
         return;
     }
@@ -896,8 +897,9 @@ function handleStartGame() {
     city = cityInput.value.trim();
     storeAddress = storeAddressInput.value.trim();
     storeCode = storeCodeInput.value.trim();
+    const isConfirmed = confirmationCheckbox.checked;
     
-    if (participantName && participantRole && hostName && network && city && storeAddress && storeCode) {
+    if (participantName && participantRole && hostName && network && city && storeAddress && storeCode && isConfirmed) {
         hideNamesModal();
         gameStarted = true;
         gameStartTime = new Date();
@@ -905,7 +907,15 @@ function handleStartGame() {
         if (roundInfo) roundInfo.style.display = 'block';
         createCards();
     } else {
-        alert('Пожалуйста, заполните все поля.');
+        alert('Пожалуйста, заполните все поля и подтвердите правильность данных.');
+        
+        // Подсвечиваем неподтвержденный чекбокс
+        if (!isConfirmed) {
+            confirmationCheckbox.style.outline = '2px solid #ff6b6b';
+            setTimeout(() => {
+                confirmationCheckbox.style.outline = '';
+            }, 2000);
+        }
     }
 }
 
@@ -957,6 +967,12 @@ function handleSubmitFeedback() {
     const feedbackInput = document.getElementById('feedback');
     if (feedbackInput) {
         feedback = feedbackInput.value.trim();
+        
+        if (!feedback) {
+            alert('Пожалуйста, заполните поле обратной связи.');
+            feedbackInput.focus();
+            return;
+        }
         
         // Сохраняем результаты в файл (с обратной связью)
         saveGameResultsToFile();
