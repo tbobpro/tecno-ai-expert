@@ -1,4 +1,4 @@
-// leaderboard.js - Исправленная версия
+// leaderboard.js - Работающая версия с исправлениями
 
 const scriptURL = 'https://script.google.com/macros/s/AKfycbzGI2sCdYQECLeRvBd4ppmcSMj80kTGrdsIkSfvL1gxxvzcSRxTUHSYFCwR-NCoALqB/exec';
 
@@ -57,7 +57,7 @@ function renderOverallLeaderboard(data) {
     }
 }
 
-// Улучшенная функция для загрузки общего лидерборда
+// Функция для загрузки общего лидерборда
 async function loadOverallLeaderboard(forceRefresh = false) {
     if (cachedOverallData && !forceRefresh) {
         currentData = cachedOverallData;
@@ -67,67 +67,33 @@ async function loadOverallLeaderboard(forceRefresh = false) {
     
     try {
         const loading = document.getElementById('loading');
-        const noData = document.getElementById('noData');
-        
         loading.style.display = 'block';
-        noData.style.display = 'none';
         
-        // Добавляем timestamp для предотвращения кэширования
-        const timestamp = new Date().getTime();
-        const url = `${scriptURL}?action=getLeaderboard&t=${timestamp}`;
-        
-        console.log('Загрузка общего зачета по URL:', url);
-        
-        const response = await fetch(url);
-        
-        console.log('Статус ответа:', response.status);
+        const response = await fetch(scriptURL + '?action=getLeaderboard&t=' + new Date().getTime());
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const responseText = await response.text();
-        console.log('Получен ответ:', responseText);
+        const data = await response.json();
         
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('Ошибка парсинга JSON:', parseError);
-            throw new Error('Неверный формат данных от сервера');
+        cachedOverallData = data;
+        currentData = data;
+        
+        renderOverallLeaderboard(data);
+        
+        if (isInitialLoad) {
+            populateFilters(data);
+            isInitialLoad = false;
         }
-        
-        // Проверяем структуру ответа
-        if (data && data.result === 'success' && Array.isArray(data.data)) {
-            cachedOverallData = data.data;
-            currentData = data.data;
-            
-            renderOverallLeaderboard(data.data);
-            
-            if (isInitialLoad) {
-                populateFilters(data.data);
-                isInitialLoad = false;
-            }
-        } else if (data && data.result === 'error') {
-            throw new Error(data.message || 'Ошибка сервера');
-        } else {
-            throw new Error('Неверный формат данных');
-        }
-        
     } catch (error) {
-        console.error('Ошибка загрузки общего зачета:', error);
+        console.error('Ошибка загрузки данных:', error);
         const loading = document.getElementById('loading');
-        const noData = document.getElementById('noData');
-        
         loading.style.display = 'none';
+        
+        const noData = document.getElementById('noData');
         noData.style.display = 'block';
-        noData.innerHTML = `
-            <p>Ошибка загрузки данных: ${error.message}</p>
-            <p>Проверьте подключение к интернету и попробуйте обновить страницу.</p>
-            <button onclick="loadOverallLeaderboard(true)" class="refresh-btn" style="margin-top: 10px;">
-                <i class="fas fa-sync-alt"></i> Попробовать снова
-            </button>
-        `;
+        noData.innerHTML = '<p>Ошибка загрузки данных. Проверьте подключение к интернету.</p>';
         
         currentData = [];
     }
@@ -139,83 +105,73 @@ async function loadCategoryLeaderboard(category) {
     
     try {
         const loading = document.getElementById('loading');
-        const table = document.getElementById('leaderboardTable');
-        const tbody = document.getElementById('leaderboardBody');
-        const tableHeader = document.getElementById('tableHeader');
-        const noData = document.getElementById('noData');
-        
         loading.style.display = 'block';
-        noData.style.display = 'none';
         
-        const timestamp = new Date().getTime();
-        const url = `${scriptURL}?action=getCategoryLeaderboard&category=${encodeURIComponent(category)}&t=${timestamp}`;
-        
-        console.log('Загрузка категории по URL:', url);
-        
-        const response = await fetch(url);
+        const response = await fetch(scriptURL + '?action=getCategoryLeaderboard&category=' + encodeURIComponent(category) + '&t=' + new Date().getTime());
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const responseText = await response.text();
-        const result = JSON.parse(responseText);
+        const data = await response.json();
         
-        if (result.result === 'success' && Array.isArray(result.data)) {
-            const data = result.data;
+        const table = document.getElementById('leaderboardTable');
+        const tbody = document.getElementById('leaderboardBody');
+        const tableHeader = document.getElementById('tableHeader');
+        const noData = document.getElementById('noData');
+        
+        if (data && data.length > 0) {
+            tableHeader.innerHTML = `
+                <th class="rank">Место</th>
+                <th>Участник</th>
+                <th>Должность</th>
+                <th>Город</th>
+                <th>Сеть</th>
+                <th>Время</th>
+            `;
             
-            if (data && data.length > 0) {
-                tableHeader.innerHTML = `
-                    <th class="rank">Место</th>
-                    <th>Участник</th>
-                    <th>Должность</th>
-                    <th>Город</th>
-                    <th>Сеть</th>
-                    <th>Время</th>
-                    <th>Дата</th>
+            tbody.innerHTML = '';
+            data.forEach((participant, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="rank rank-${index + 1}">${index + 1}</td>
+                    <td class="participant-name">${participant.participant}</td>
+                    <td>${participant.participantRole}</td>
+                    <td>${participant.city}</td>
+                    <td>${participant.network}</td>
+                    <td>${participant.time}</td>
                 `;
-                
-                tbody.innerHTML = '';
-                data.forEach((participant, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td class="rank rank-${index + 1}">${index + 1}</td>
-                        <td class="participant-name">${participant.participant}</td>
-                        <td>${participant.participantRole}</td>
-                        <td>${participant.city}</td>
-                        <td>${participant.network}</td>
-                        <td>${participant.time}</td>
-                        <td>${participant.date}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                loading.style.display = 'none';
-                table.style.display = 'table';
-                noData.style.display = 'none';
-            } else {
-                loading.style.display = 'none';
-                table.style.display = 'none';
-                noData.style.display = 'block';
-                noData.innerHTML = '<p>Нет данных для выбранной категории</p>';
-            }
+                tbody.appendChild(row);
+            });
+            
+            loading.style.display = 'none';
+            table.style.display = 'table';
+            noData.style.display = 'none';
         } else {
-            throw new Error(result.message || 'Ошибка загрузки данных категории');
+            loading.style.display = 'none';
+            table.style.display = 'none';
+            noData.style.display = 'block';
+            noData.innerHTML = '<p>Нет данных для выбранной категории</p>';
         }
-        
     } catch (error) {
         console.error('Ошибка загрузки данных категории:', error);
         const loading = document.getElementById('loading');
-        const noData = document.getElementById('noData');
-        
         loading.style.display = 'none';
+        
+        const noData = document.getElementById('noData');
         noData.style.display = 'block';
-        noData.innerHTML = `<p>Ошибка загрузки данных: ${error.message}</p>`;
+        noData.innerHTML = '<p>Ошибка загрузки данных. Попробуйте обновить страницу.</p>';
     }
 }
 
-// Функция для поиска участника
+// Функция для поиска участника с обязательными фильтрами
 async function searchParticipant(participantName, network, city) {
+    // Проверяем, что выбраны сеть и город
+    if (!network || !city) {
+        showTempMessage('Пожалуйста, выберите сеть и город для поиска', 'error');
+        return;
+    }
+    
     try {
         const searchBtn = document.getElementById('searchBtn');
         const loading = document.getElementById('loading');
@@ -227,7 +183,6 @@ async function searchParticipant(participantName, network, city) {
         searchBtn.classList.add('loading');
         searchResults.style.display = 'none';
         searchNoData.style.display = 'none';
-        loading.style.display = 'block';
         
         const params = new URLSearchParams({
             action: 'searchParticipant',
@@ -238,19 +193,14 @@ async function searchParticipant(participantName, network, city) {
         if (network) params.append('network', network);
         if (city) params.append('city', city);
         
-        const url = `${scriptURL}?${params.toString()}`;
-        console.log('Поиск участника по URL:', url);
-        
-        const response = await fetch(url);
+        const response = await fetch(scriptURL + '?' + params.toString());
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const responseText = await response.text();
-        const data = JSON.parse(responseText);
+        const data = await response.json();
         
-        loading.style.display = 'none';
         searchBtn.disabled = false;
         searchBtn.classList.remove('loading');
         
@@ -258,34 +208,29 @@ async function searchParticipant(participantName, network, city) {
             throw new Error(data.error);
         }
         
-        if (data.result === 'success' && data.data && data.data.length > 0) {
-            currentSearchResults = data.data;
-            renderSearchResults(data.data, participantName, network, city);
+        if (data.length > 0) {
+            renderSearchResults(data, participantName, network, city);
             showTempMessage('Участник найден!', 'success');
         } else {
-            currentSearchResults = null;
             searchNoData.style.display = 'block';
-            searchNoData.innerHTML = `<p>Участник "${participantName}"${network ? ` в сети "${network}"` : ''}${city ? ` в городе "${city}"` : ''} не найден или не имеет результатов</p>`;
+            searchNoData.innerHTML = `<p>Участник "${participantName}" в сети "${network}" в городе "${city}" не найден или не имеет результатов</p>`;
             showTempMessage('Участник не найден', 'info');
         }
         
     } catch (error) {
         console.error('Ошибка поиска:', error);
         const searchBtn = document.getElementById('searchBtn');
-        const loading = document.getElementById('loading');
-        
-        loading.style.display = 'none';
         searchBtn.disabled = false;
         searchBtn.classList.remove('loading');
         
         const searchNoData = document.getElementById('searchNoData');
         searchNoData.style.display = 'block';
-        searchNoData.innerHTML = `<p>Ошибка при поиске участника: ${error.message}</p>`;
+        searchNoData.innerHTML = '<p>Ошибка при поиске участника. Попробуйте еще раз.</p>';
         showTempMessage('Ошибка при поиске', 'error');
     }
 }
 
-// Функция для отрисовки результатов поиска
+// Функция для отрисовки результатов поиска (без даты)
 function renderSearchResults(data, participantName, network, city) {
     const searchResults = document.getElementById('searchResults');
     const participantInfo = document.getElementById('participantInfo');
@@ -293,14 +238,14 @@ function renderSearchResults(data, participantName, network, city) {
     const searchNoData = document.getElementById('searchNoData');
     
     // Обновляем информацию об участнике
-    let infoHTML = `<strong>Участник:</strong> ${participantName}`;
-    if (network) infoHTML += `<br><strong>Сеть:</strong> ${network}`;
-    if (city) infoHTML += `<br><strong>Город:</strong> ${city}`;
-    infoHTML += `<br><strong>Найдено категорий:</strong> ${data.length}`;
+    participantInfo.innerHTML = `
+        <strong>Участник:</strong> ${participantName}<br>
+        <strong>Сеть:</strong> ${network}<br>
+        <strong>Город:</strong> ${city}<br>
+        <strong>Найдено категорий:</strong> ${data.length}
+    `;
     
-    participantInfo.innerHTML = infoHTML;
-    
-    // Заполняем таблицу
+    // Заполняем таблицу (без колонки даты)
     searchResultsBody.innerHTML = '';
     data.forEach(item => {
         const row = document.createElement('tr');
@@ -316,7 +261,6 @@ function renderSearchResults(data, participantName, network, city) {
             <td>${item.bestTime}</td>
             <td class="rank ${rankClass}">${item.rank}</td>
             <td>${item.totalParticipants}</td>
-            <td>${item.date}</td>
         `;
         searchResultsBody.appendChild(row);
     });
@@ -327,19 +271,13 @@ function renderSearchResults(data, participantName, network, city) {
 
 // Функция для заполнения фильтров
 function populateFilters(data) {
-    const networks = [...new Set(data.map(p => p.network).filter(n => n && n.trim() !== ''))].sort();
-    const cities = [...new Set(data.map(p => p.city).filter(c => c && c.trim() !== ''))].sort();
+    const networks = [...new Set(data.map(p => p.network))].filter(n => n);
+    const cities = [...new Set(data.map(p => p.city))].filter(c => c);
     
     const networkFilter = document.getElementById('networkFilter');
     const cityFilter = document.getElementById('cityFilter');
     const searchNetwork = document.getElementById('searchNetwork');
     const searchCity = document.getElementById('searchCity');
-    
-    // Очищаем существующие опции (кроме первой)
-    clearSelectOptions(networkFilter);
-    clearSelectOptions(cityFilter);
-    clearSelectOptions(searchNetwork);
-    clearSelectOptions(searchCity);
     
     // Заполняем фильтры для общего зачета
     networks.forEach(network => {
@@ -362,16 +300,8 @@ function populateFilters(data) {
         searchCity.appendChild(searchOption);
     });
     
-    // Добавляем обработчики событий
     networkFilter.addEventListener('change', filterLeaderboard);
     cityFilter.addEventListener('change', filterLeaderboard);
-}
-
-// Функция для очистки опций select (кроме первой)
-function clearSelectOptions(selectElement) {
-    while (selectElement.options.length > 1) {
-        selectElement.remove(1);
-    }
 }
 
 // Функция для фильтрации таблицы
@@ -458,6 +388,9 @@ function switchLeaderboardType(type) {
     } else if (type === 'search') {
         searchBtn.classList.add('active');
         searchSection.style.display = 'block';
+        // Очищаем предыдущие результаты поиска
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('searchNoData').style.display = 'none';
         
         // Восстанавливаем значения полей поиска
         document.getElementById('searchParticipant').value = currentSearchParticipant;
@@ -494,7 +427,7 @@ async function refreshLeaderboard() {
             const network = document.getElementById('searchNetwork').value;
             const city = document.getElementById('searchCity').value;
             
-            if (participantName) {
+            if (participantName && network && city) {
                 await searchParticipant(participantName, network, city);
             }
         }
@@ -512,10 +445,6 @@ async function refreshLeaderboard() {
 
 // Функция для показа временного сообщения
 function showTempMessage(message, type = 'info') {
-    // Удаляем существующие сообщения
-    const existingMessages = document.querySelectorAll('.temp-message');
-    existingMessages.forEach(msg => msg.remove());
-    
     const messageEl = document.createElement('div');
     messageEl.className = `temp-message temp-message-${type}`;
     messageEl.textContent = message;
@@ -601,20 +530,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработчик для кнопки обновления
     document.getElementById('refreshBtn').addEventListener('click', refreshLeaderboard);
     
-    // Обработчик для кнопки поиска
+    // Обработчик для кнопки поиска (с проверкой обязательных полей)
     document.getElementById('searchBtn').addEventListener('click', function() {
         const participantName = document.getElementById('searchParticipant').value.trim();
         const network = document.getElementById('searchNetwork').value;
         const city = document.getElementById('searchCity').value;
         
-        if (participantName) {
+        if (participantName && network && city) {
             currentSearchParticipant = participantName;
             currentSearchNetwork = network;
             currentSearchCity = city;
             searchParticipant(participantName, network, city);
         } else {
-            showTempMessage('Пожалуйста, введите имя участника', 'error');
-            document.getElementById('searchParticipant').focus();
+            if (!participantName) {
+                showTempMessage('Пожалуйста, введите имя участника', 'error');
+                document.getElementById('searchParticipant').focus();
+            } else if (!network) {
+                showTempMessage('Пожалуйста, выберите сеть', 'error');
+                document.getElementById('searchNetwork').focus();
+            } else if (!city) {
+                showTempMessage('Пожалуйста, выберите город', 'error');
+                document.getElementById('searchCity').focus();
+            }
         }
     });
     
@@ -635,11 +572,4 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshLeaderboard();
         }
     });
-    
-    // Периодическое обновление данных каждые 2 минуты
-    setInterval(() => {
-        if (currentLeaderboardType === 'overall') {
-            loadOverallLeaderboard(true);
-        }
-    }, 120000);
 });
