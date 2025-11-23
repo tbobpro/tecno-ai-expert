@@ -81,7 +81,7 @@ window.cardExplanations = {
 };
 
 // URL скрипта Google Apps
-const scriptURL = 'https://script.google.com/macros/s/AKfycbw4uyFfsAIdXJaa75i8p0jU83ZOC7Z_4KVKWfx8uXgJ0qbTcJPaQ8J8N_dHKFsyREYa/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbx9FFzLBcMkrVnrsW1USt0cWgzrDXEQr22uOaQih7W7c_JsoQ9Kkv5BRZtN64co66Jv/exec';
 
 // Инициализация игры при загрузке DOM
 document.addEventListener('DOMContentLoaded', function() {
