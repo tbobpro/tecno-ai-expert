@@ -1,6 +1,6 @@
 // leaderboard.js - Работающая версия с исправлениями
 
-const scriptURL = 'https://script.google.com/macros/s/AKfycbzGI2sCdYQECLeRvBd4ppmcSMj80kTGrdsIkSfvL1gxxvzcSRxTUHSYFCwR-NCoALqB/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbx4pMzJudIN6uXmWK4fv4RWC6Wo-Y43wPPAH5Z1VZyjdRnNnf-ISFqMVYZpKc0xev_v/exec';
 
 // Глобальные переменные
 let currentLeaderboardType = 'overall';
