@@ -13,13 +13,21 @@
         <header>
             <h1><i class="fas fa-trophy"></i> Таблица лидеров</h1>
             <div class="subtitle">Лучшие результаты участников по категориям заданий</div>
+            
+            <div class="header-controls">
+                <button id="refreshBtn" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i> Обновить данные
+                </button>
+            </div>
         </header>
 
         <div class="leaderboard-type-selector">
             <button class="type-btn active" data-type="overall">Общий зачет (Топ-15)</button>
             <button class="type-btn" data-type="category">Топ по категориям</button>
+            <button class="type-btn" data-type="search">Поиск участника</button>
         </div>
 
+        <!-- Фильтры для общего зачета -->
         <div class="filters">
             <select id="networkFilter" class="filter-select">
                 <option value="">Все сети</option>
@@ -29,6 +37,7 @@
             </select>
         </div>
 
+        <!-- Селектор категорий -->
         <div class="category-selector" id="categorySelector">
             <select id="categoryFilter" class="category-select">
                 <option value="">Выберите категорию</option>
@@ -42,7 +51,7 @@
                 <option value="Интеграция с сервисами Яндекс">Интеграция с сервисами Яндекс</option>
                 <option value="Решение математических задач">Решение математических задач</option>
                 <option value="Студия AI (Удаление объекта с фотографии)">Студия AI (Удаление объекта с фотографии)</option>
-                <option value="Студия AI (Расширение границ кадра)">Студия AI (Расширение границ кадра)</option>
+                <option value="Студия AI (Расширение границ кадра)">Студия AI (Расширование границ кадра)</option>
                 <option value="Студия AI (AI Доска для рисования)">Студия AI (AI Доска для рисования)</option>
                 <option value="Студия AI (AI Генератор обоев)">Студия AI (AI Генератор обоев)</option>
                 <option value="Студия AI (Улучшение групповых портретов)">Студия AI (Улучшение групповых портретов)</option>
@@ -54,6 +63,55 @@
                 <option value="Телефонный помощник (Перевод звонков в реальном времени)">Телефонный помощник (Перевод звонков в реальном времени)</option>
                 <option value="Телефонный помощник (ИИ Шумоподавление)">Телефонный помощник (ИИ Шумоподавление)</option>
             </select>
+        </div>
+
+        <!-- Секция поиска участника -->
+        <div class="search-section" id="searchSection" style="display: none;">
+            <div class="search-form">
+                <div class="form-group">
+                    <label for="searchParticipant">Имя и фамилия участника:</label>
+                    <input type="text" id="searchParticipant" placeholder="Введите имя и фамилию участника">
+                </div>
+                <div class="form-group">
+                    <label for="searchNetwork">Сеть:</label>
+                    <select id="searchNetwork" class="filter-select">
+                        <option value="">Все сети</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="searchCity">Город:</label>
+                    <select id="searchCity" class="filter-select">
+                        <option value="">Все города</option>
+                    </select>
+                </div>
+                <button id="searchBtn" class="search-btn">
+                    <i class="fas fa-search"></i> Найти участника
+                </button>
+            </div>
+            
+            <div id="searchResults" class="search-results" style="display: none;">
+                <h3>Результаты поиска</h3>
+                <div class="participant-info" id="participantInfo"></div>
+                <div class="table-container">
+                    <table class="search-results-table">
+                        <thead>
+                            <tr>
+                                <th>Категория</th>
+                                <th>Лучшее время</th>
+                                <th>Место</th>
+                                <th>Всего участников</th>
+                                <th>Дата</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="searchNoData" class="no-data" style="display: none;">
+                <p>Участник не найден или не имеет результатов</p>
+            </div>
         </div>
 
         <div id="loading" class="loading">
@@ -79,7 +137,6 @@
         </div>
 
         <div class="back-btn-container">
-            <!-- ЗАМЕНИЛИ ССЫЛКУ НА КНОПКУ ДЛЯ ЗАКРЫТИЯ ВКЛАДКИ -->
             <button class="back-btn" id="closeTabBtn">
                 <i class="fas fa-times"></i> Закрыть вкладку
             </button>
