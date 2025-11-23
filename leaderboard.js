@@ -1,6 +1,6 @@
-// leaderboard.js - Исправленная версия
+// leaderboard.js - Полная исправленная версия
 
-const scriptURL = 'https://script.google.com/macros/s/AKfycbzGI2sCdYQECLeRvBd4ppmcSMj80kTGrdsIkSfvL1gxxvzcSRxTUHSYFCwR-NCoALqB/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbylDxSX96dB6MmlqK0pr5xFxMM1mqUTlECAUV6Qru1beyUJDKQ_e0LhKrtdBfynoVjI/exec';
 
 // Глобальные переменные
 let currentLeaderboardType = 'overall';
@@ -72,7 +72,6 @@ async function loadOverallLeaderboard(forceRefresh = false) {
         loading.style.display = 'block';
         noData.style.display = 'none';
         
-        // Добавляем timestamp для предотвращения кэширования
         const timestamp = new Date().getTime();
         const url = `${scriptURL}?action=getLeaderboard&t=${timestamp}`;
         
@@ -105,7 +104,8 @@ async function loadOverallLeaderboard(forceRefresh = false) {
             renderOverallLeaderboard(data.data);
             
             if (isInitialLoad) {
-                populateFilters(data.data);
+                // Загружаем все фильтры после загрузки данных
+                loadAllFilters();
                 isInitialLoad = false;
             }
         } else if (data && data.result === 'error') {
@@ -130,6 +130,132 @@ async function loadOverallLeaderboard(forceRefresh = false) {
         `;
         
         currentData = [];
+    }
+}
+
+// НОВАЯ ФУНКЦИЯ: Загрузка всех фильтров (сетей и городов)
+async function loadAllFilters() {
+    try {
+        const timestamp = new Date().getTime();
+        const url = `${scriptURL}?action=getAllNetworksAndCities&t=${timestamp}`;
+        
+        console.log('Загрузка фильтров по URL:', url);
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const responseText = await response.text();
+        const result = JSON.parse(responseText);
+        
+        if (result.result === 'success' && result.data) {
+            const networks = result.data.networks || [];
+            const cities = result.data.cities || [];
+            
+            populateFilters(networks, cities);
+            console.log('Фильтры загружены: сети -', networks.length, 'города -', cities.length);
+        } else {
+            throw new Error(result.message || 'Ошибка загрузки фильтров');
+        }
+        
+    } catch (error) {
+        console.error('Ошибка загрузки фильтров:', error);
+        // Используем данные из общего зачета как запасной вариант
+        if (currentData && currentData.length > 0) {
+            const networks = [...new Set(currentData.map(p => p.network).filter(n => n))].sort();
+            const cities = [...new Set(currentData.map(p => p.city).filter(c => c))].sort();
+            populateFilters(networks, cities);
+        }
+    }
+}
+
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ: Заполнение фильтров из всех данных
+function populateFilters(networks, cities) {
+    const networkFilter = document.getElementById('networkFilter');
+    const cityFilter = document.getElementById('cityFilter');
+    const searchNetwork = document.getElementById('searchNetwork');
+    const searchCity = document.getElementById('searchCity');
+    
+    // Очищаем существующие опции (кроме первой)
+    clearSelectOptions(networkFilter);
+    clearSelectOptions(cityFilter);
+    clearSelectOptions(searchNetwork);
+    clearSelectOptions(searchCity);
+    
+    // Заполняем фильтры для общего зачета
+    networks.forEach(network => {
+        const option = document.createElement('option');
+        option.value = network;
+        option.textContent = network;
+        networkFilter.appendChild(option);
+        
+        const searchOption = option.cloneNode(true);
+        searchNetwork.appendChild(searchOption);
+    });
+    
+    cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        cityFilter.appendChild(option);
+        
+        const searchOption = option.cloneNode(true);
+        searchCity.appendChild(searchOption);
+    });
+    
+    // Добавляем обработчики событий
+    networkFilter.addEventListener('change', filterLeaderboard);
+    cityFilter.addEventListener('change', filterLeaderboard);
+}
+
+// Функция для очистки опций select (кроме первой)
+function clearSelectOptions(selectElement) {
+    while (selectElement.options.length > 1) {
+        selectElement.remove(1);
+    }
+}
+
+// Функция для фильтрации таблицы
+function filterLeaderboard() {
+    if (currentLeaderboardType !== 'overall' || !currentData || currentData.length === 0) return;
+    
+    const networkFilter = document.getElementById('networkFilter').value;
+    const cityFilter = document.getElementById('cityFilter').value;
+    const tbody = document.getElementById('leaderboardBody');
+    
+    tbody.innerHTML = '';
+    
+    const filteredData = currentData.filter(participant => {
+        const networkMatch = !networkFilter || participant.network === networkFilter;
+        const cityMatch = !cityFilter || participant.city === cityFilter;
+        return networkMatch && cityMatch;
+    });
+    
+    filteredData.forEach((participant, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="rank rank-${index + 1}">${index + 1}</td>
+            <td class="participant-name">${participant.participant}</td>
+            <td>${participant.participantRole}</td>
+            <td>${participant.city}</td>
+            <td>${participant.network}</td>
+            <td>${participant.totalTime}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    const table = document.getElementById('leaderboardTable');
+    const noData = document.getElementById('noData');
+    
+    if (filteredData.length === 0) {
+        table.style.display = 'none';
+        noData.style.display = 'block';
+        noData.innerHTML = '<p>Нет данных для выбранных фильтров</p>';
+    } else {
+        table.style.display = 'table';
+        noData.style.display = 'none';
     }
 }
 
@@ -323,97 +449,6 @@ function renderSearchResults(data, participantName, network, city) {
     
     searchResults.style.display = 'block';
     searchNoData.style.display = 'none';
-}
-
-// Функция для заполнения фильтров
-function populateFilters(data) {
-    const networks = [...new Set(data.map(p => p.network).filter(n => n && n.trim() !== ''))].sort();
-    const cities = [...new Set(data.map(p => p.city).filter(c => c && c.trim() !== ''))].sort();
-    
-    const networkFilter = document.getElementById('networkFilter');
-    const cityFilter = document.getElementById('cityFilter');
-    const searchNetwork = document.getElementById('searchNetwork');
-    const searchCity = document.getElementById('searchCity');
-    
-    // Очищаем существующие опции (кроме первой)
-    clearSelectOptions(networkFilter);
-    clearSelectOptions(cityFilter);
-    clearSelectOptions(searchNetwork);
-    clearSelectOptions(searchCity);
-    
-    // Заполняем фильтры для общего зачета
-    networks.forEach(network => {
-        const option = document.createElement('option');
-        option.value = network;
-        option.textContent = network;
-        networkFilter.appendChild(option);
-        
-        const searchOption = option.cloneNode(true);
-        searchNetwork.appendChild(searchOption);
-    });
-    
-    cities.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city;
-        option.textContent = city;
-        cityFilter.appendChild(option);
-        
-        const searchOption = option.cloneNode(true);
-        searchCity.appendChild(searchOption);
-    });
-    
-    // Добавляем обработчики событий
-    networkFilter.addEventListener('change', filterLeaderboard);
-    cityFilter.addEventListener('change', filterLeaderboard);
-}
-
-// Функция для очистки опций select (кроме первой)
-function clearSelectOptions(selectElement) {
-    while (selectElement.options.length > 1) {
-        selectElement.remove(1);
-    }
-}
-
-// Функция для фильтрации таблицы
-function filterLeaderboard() {
-    if (currentLeaderboardType !== 'overall' || !currentData || currentData.length === 0) return;
-    
-    const networkFilter = document.getElementById('networkFilter').value;
-    const cityFilter = document.getElementById('cityFilter').value;
-    const tbody = document.getElementById('leaderboardBody');
-    
-    tbody.innerHTML = '';
-    
-    const filteredData = currentData.filter(participant => {
-        const networkMatch = !networkFilter || participant.network === networkFilter;
-        const cityMatch = !cityFilter || participant.city === cityFilter;
-        return networkMatch && cityMatch;
-    });
-    
-    filteredData.forEach((participant, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="rank rank-${index + 1}">${index + 1}</td>
-            <td class="participant-name">${participant.participant}</td>
-            <td>${participant.participantRole}</td>
-            <td>${participant.city}</td>
-            <td>${participant.network}</td>
-            <td>${participant.totalTime}</td>
-        `;
-        tbody.appendChild(row);
-    });
-    
-    const table = document.getElementById('leaderboardTable');
-    const noData = document.getElementById('noData');
-    
-    if (filteredData.length === 0) {
-        table.style.display = 'none';
-        noData.style.display = 'block';
-        noData.innerHTML = '<p>Нет данных для выбранных фильтров</p>';
-    } else {
-        table.style.display = 'table';
-        noData.style.display = 'none';
-    }
 }
 
 // Функция для переключения типа лидерборда
