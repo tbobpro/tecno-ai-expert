@@ -1,5 +1,6 @@
-// leaderboard.js - Полностью исправленная версия
+// leaderboard.js - Полностью переработанная версия
 
+// URL скрипта Google Apps - ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ URL
 const scriptURL = 'https://script.google.com/macros/s/AKfycbx3bKqR2Vkb-DnZVEQIkTRfnBT3uiVRvyt4jmVcuqh5vfU-4W9p2xBsDOCf0j6JiUY/exec';
 
 // Глобальные переменные
@@ -13,6 +14,32 @@ let currentSearchCity = '';
 let currentSearchResults = null;
 let isInitialLoad = true;
 let refreshInProgress = false;
+
+// Улучшенная функция для выполнения запросов
+async function makeRequest(url, options = {}) {
+    try {
+        console.log('Выполняем запрос:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            ...options,
+            mode: 'cors',
+            cache: 'no-cache'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('Получен ответ:', result);
+        return result;
+        
+    } catch (error) {
+        console.error('Ошибка запроса:', error);
+        throw error;
+    }
+}
 
 // Функция для отрисовки общего лидерборда
 function renderOverallLeaderboard(data) {
@@ -75,15 +102,10 @@ async function loadOverallLeaderboard(forceRefresh = false) {
         noData.style.display = 'none';
         
         const timestamp = new Date().getTime();
-        const response = await fetch(`${scriptURL}?action=getLeaderboard&t=${timestamp}`);
+        const url = `${scriptURL}?action=getLeaderboard&t=${timestamp}`;
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        const result = await makeRequest(url);
         
-        const result = await response.json();
-        
-        // Проверяем структуру ответа
         if (result && result.result === 'success') {
             cachedOverallData = result.data || [];
             currentData = cachedOverallData;
@@ -107,7 +129,20 @@ async function loadOverallLeaderboard(forceRefresh = false) {
         
         loading.style.display = 'none';
         noData.style.display = 'block';
-        noData.innerHTML = `<p>Ошибка загрузки данных: ${error.message}</p>`;
+        
+        if (error.message.includes('Failed to fetch')) {
+            noData.innerHTML = `
+                <p>Ошибка подключения к серверу</p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">
+                    Проверьте:<br>
+                    - Интернет-подключение<br>
+                    - URL скрипта в настройках<br>
+                    - Настройки CORS в Google Apps Script
+                </p>
+            `;
+        } else {
+            noData.innerHTML = `<p>Ошибка загрузки данных: ${error.message}</p>`;
+        }
         
         currentData = [];
     }
@@ -127,13 +162,9 @@ async function loadCategoryLeaderboard(category) {
         noData.style.display = 'none';
         
         const timestamp = new Date().getTime();
-        const response = await fetch(`${scriptURL}?action=getCategoryLeaderboard&category=${encodeURIComponent(category)}&t=${timestamp}`);
+        const url = `${scriptURL}?action=getCategoryLeaderboard&category=${encodeURIComponent(category)}&t=${timestamp}`;
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
+        const result = await makeRequest(url);
         
         const tbody = document.getElementById('leaderboardBody');
         const tableHeader = document.getElementById('tableHeader');
@@ -208,21 +239,9 @@ async function searchParticipant(participantName, network, city) {
         loading.style.display = 'block';
         
         const timestamp = new Date().getTime();
-        const params = new URLSearchParams({
-            action: 'searchParticipant',
-            participant: participantName,
-            network: network,
-            city: city,
-            t: timestamp
-        });
+        const url = `${scriptURL}?action=searchParticipant&participant=${encodeURIComponent(participantName)}&network=${encodeURIComponent(network)}&city=${encodeURIComponent(city)}&t=${timestamp}`;
         
-        const response = await fetch(`${scriptURL}?${params.toString()}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
+        const result = await makeRequest(url);
         
         searchBtn.disabled = false;
         searchBtn.classList.remove('loading');
@@ -570,6 +589,8 @@ function closeTab() {
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Инициализация таблицы лидеров...');
+    
     // Загружаем общий лидерборд по умолчанию
     loadOverallLeaderboard();
     
@@ -660,4 +681,6 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshLeaderboard();
         }
     });
+    
+    console.log('Таблица лидеров инициализирована');
 });
