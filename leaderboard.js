@@ -1,6 +1,6 @@
 // leaderboard.js - Полностью обновленная версия с поиском участника
 
-const scriptURL = 'https://script.google.com/macros/library/d/1n7FNPaoEFuKkhsBrYBWmdKpUZ8VQ4e9WsasShZF5DjT39gyL3H8ws_dO/14';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbylDxSX96dB6MmlqK0pr5xFxMM1mqUTlECAUV6Qru1beyUJDKQ_e0LhKrtdBfynoVjI/exec';
 
 // Глобальные переменные
 let currentLeaderboardType = 'overall';
