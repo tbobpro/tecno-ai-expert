@@ -1,4 +1,4 @@
-// leaderboard.js - Работающая версия с исправлениями
+// leaderboard.js - Полностью исправленная версия
 
 const scriptURL = 'https://script.google.com/macros/s/AKfycbx4pMzJudIN6uXmWK4fv4RWC6Wo-Y43wPPAH5Z1VZyjdRnNnf-ISFqMVYZpKc0xev_v/exec';
 
@@ -67,33 +67,47 @@ async function loadOverallLeaderboard(forceRefresh = false) {
     
     try {
         const loading = document.getElementById('loading');
-        loading.style.display = 'block';
+        const noData = document.getElementById('noData');
+        const table = document.getElementById('leaderboardTable');
         
-        const response = await fetch(scriptURL + '?action=getLeaderboard&t=' + new Date().getTime());
+        loading.style.display = 'block';
+        table.style.display = 'none';
+        noData.style.display = 'none';
+        
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${scriptURL}?action=getLeaderboard&t=${timestamp}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
+        const result = await response.json();
         
-        cachedOverallData = data;
-        currentData = data;
-        
-        renderOverallLeaderboard(data);
-        
-        if (isInitialLoad) {
-            populateFilters(data);
-            isInitialLoad = false;
+        // Проверяем структуру ответа
+        if (result && result.result === 'success') {
+            cachedOverallData = result.data || [];
+            currentData = cachedOverallData;
+            
+            renderOverallLeaderboard(currentData);
+            
+            if (isInitialLoad) {
+                populateFilters(currentData);
+                isInitialLoad = false;
+            }
+        } else if (result && result.result === 'error') {
+            throw new Error(result.message);
+        } else {
+            throw new Error('Неверный формат ответа от сервера');
         }
+        
     } catch (error) {
         console.error('Ошибка загрузки данных:', error);
         const loading = document.getElementById('loading');
-        loading.style.display = 'none';
-        
         const noData = document.getElementById('noData');
+        
+        loading.style.display = 'none';
         noData.style.display = 'block';
-        noData.innerHTML = '<p>Ошибка загрузки данных. Проверьте подключение к интернету.</p>';
+        noData.innerHTML = `<p>Ошибка загрузки данных: ${error.message}</p>`;
         
         currentData = [];
     }
@@ -105,22 +119,26 @@ async function loadCategoryLeaderboard(category) {
     
     try {
         const loading = document.getElementById('loading');
-        loading.style.display = 'block';
+        const table = document.getElementById('leaderboardTable');
+        const noData = document.getElementById('noData');
         
-        const response = await fetch(scriptURL + '?action=getCategoryLeaderboard&category=' + encodeURIComponent(category) + '&t=' + new Date().getTime());
+        loading.style.display = 'block';
+        table.style.display = 'none';
+        noData.style.display = 'none';
+        
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${scriptURL}?action=getCategoryLeaderboard&category=${encodeURIComponent(category)}&t=${timestamp}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
+        const result = await response.json();
         
-        const table = document.getElementById('leaderboardTable');
         const tbody = document.getElementById('leaderboardBody');
         const tableHeader = document.getElementById('tableHeader');
-        const noData = document.getElementById('noData');
         
-        if (data && data.length > 0) {
+        if (result && result.result === 'success' && result.data && result.data.length > 0) {
             tableHeader.innerHTML = `
                 <th class="rank">Место</th>
                 <th>Участник</th>
@@ -131,7 +149,7 @@ async function loadCategoryLeaderboard(category) {
             `;
             
             tbody.innerHTML = '';
-            data.forEach((participant, index) => {
+            result.data.forEach((participant, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="rank rank-${index + 1}">${index + 1}</td>
@@ -151,22 +169,25 @@ async function loadCategoryLeaderboard(category) {
             loading.style.display = 'none';
             table.style.display = 'none';
             noData.style.display = 'block';
-            noData.innerHTML = '<p>Нет данных для выбранной категории</p>';
+            if (result && result.result === 'error') {
+                noData.innerHTML = `<p>Ошибка: ${result.message}</p>`;
+            } else {
+                noData.innerHTML = '<p>Нет данных для выбранной категории</p>';
+            }
         }
     } catch (error) {
         console.error('Ошибка загрузки данных категории:', error);
         const loading = document.getElementById('loading');
-        loading.style.display = 'none';
-        
         const noData = document.getElementById('noData');
+        
+        loading.style.display = 'none';
         noData.style.display = 'block';
-        noData.innerHTML = '<p>Ошибка загрузки данных. Попробуйте обновить страницу.</p>';
+        noData.innerHTML = `<p>Ошибка загрузки данных: ${error.message}</p>`;
     }
 }
 
-// Функция для поиска участника с обязательными фильтрами
+// Функция для поиска участника
 async function searchParticipant(participantName, network, city) {
-    // Проверяем, что выбраны сеть и город
     if (!network || !city) {
         showTempMessage('Пожалуйста, выберите сеть и город для поиска', 'error');
         return;
@@ -177,39 +198,42 @@ async function searchParticipant(participantName, network, city) {
         const loading = document.getElementById('loading');
         const searchResults = document.getElementById('searchResults');
         const searchNoData = document.getElementById('searchNoData');
+        const table = document.getElementById('leaderboardTable');
         
-        // Показываем загрузку в кнопке поиска
         searchBtn.disabled = true;
         searchBtn.classList.add('loading');
         searchResults.style.display = 'none';
         searchNoData.style.display = 'none';
+        table.style.display = 'none';
+        loading.style.display = 'block';
         
+        const timestamp = new Date().getTime();
         const params = new URLSearchParams({
             action: 'searchParticipant',
             participant: participantName,
-            t: new Date().getTime()
+            network: network,
+            city: city,
+            t: timestamp
         });
         
-        if (network) params.append('network', network);
-        if (city) params.append('city', city);
-        
-        const response = await fetch(scriptURL + '?' + params.toString());
+        const response = await fetch(`${scriptURL}?${params.toString()}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
+        const result = await response.json();
         
         searchBtn.disabled = false;
         searchBtn.classList.remove('loading');
+        loading.style.display = 'none';
         
-        if (data.error) {
-            throw new Error(data.error);
+        if (result.result === 'error') {
+            throw new Error(result.message);
         }
         
-        if (data.length > 0) {
-            renderSearchResults(data, participantName, network, city);
+        if (result.data && result.data.length > 0) {
+            renderSearchResults(result.data, participantName, network, city);
             showTempMessage('Участник найден!', 'success');
         } else {
             searchNoData.style.display = 'block';
@@ -220,24 +244,26 @@ async function searchParticipant(participantName, network, city) {
     } catch (error) {
         console.error('Ошибка поиска:', error);
         const searchBtn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        
         searchBtn.disabled = false;
         searchBtn.classList.remove('loading');
+        loading.style.display = 'none';
         
         const searchNoData = document.getElementById('searchNoData');
         searchNoData.style.display = 'block';
-        searchNoData.innerHTML = '<p>Ошибка при поиске участника. Попробуйте еще раз.</p>';
+        searchNoData.innerHTML = `<p>Ошибка при поиске участника: ${error.message}</p>`;
         showTempMessage('Ошибка при поиске', 'error');
     }
 }
 
-// Функция для отрисовки результатов поиска (без даты)
+// Функция для отрисовки результатов поиска
 function renderSearchResults(data, participantName, network, city) {
     const searchResults = document.getElementById('searchResults');
     const participantInfo = document.getElementById('participantInfo');
     const searchResultsBody = document.getElementById('searchResultsBody');
     const searchNoData = document.getElementById('searchNoData');
     
-    // Обновляем информацию об участнике
     participantInfo.innerHTML = `
         <strong>Участник:</strong> ${participantName}<br>
         <strong>Сеть:</strong> ${network}<br>
@@ -245,12 +271,10 @@ function renderSearchResults(data, participantName, network, city) {
         <strong>Найдено категорий:</strong> ${data.length}
     `;
     
-    // Заполняем таблицу (без колонки даты)
     searchResultsBody.innerHTML = '';
     data.forEach(item => {
         const row = document.createElement('tr');
         
-        // Определяем CSS класс для места
         let rankClass = '';
         if (item.rank === 1) rankClass = 'rank-1';
         else if (item.rank === 2) rankClass = 'rank-2';
@@ -280,43 +304,73 @@ function populateFilters(data) {
     const searchCity = document.getElementById('searchCity');
     
     // Заполняем фильтры для общего зачета
-    networks.forEach(network => {
-        const option = document.createElement('option');
-        option.value = network;
-        option.textContent = network;
-        networkFilter.appendChild(option);
-        
-        const searchOption = option.cloneNode(true);
-        searchNetwork.appendChild(searchOption);
-    });
+    if (networkFilter) {
+        networkFilter.innerHTML = '<option value="">Все сети</option>';
+        networks.forEach(network => {
+            const option = document.createElement('option');
+            option.value = network;
+            option.textContent = network;
+            networkFilter.appendChild(option);
+        });
+    }
     
-    cities.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city;
-        option.textContent = city;
-        cityFilter.appendChild(option);
-        
-        const searchOption = option.cloneNode(true);
-        searchCity.appendChild(searchOption);
-    });
+    if (cityFilter) {
+        cityFilter.innerHTML = '<option value="">Все города</option>';
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            option.textContent = city;
+            cityFilter.appendChild(option);
+        });
+    }
     
-    networkFilter.addEventListener('change', filterLeaderboard);
-    cityFilter.addEventListener('change', filterLeaderboard);
+    // Заполняем фильтры для поиска
+    if (searchNetwork) {
+        searchNetwork.innerHTML = '<option value="">Выберите сеть</option>';
+        networks.forEach(network => {
+            const option = document.createElement('option');
+            option.value = network;
+            option.textContent = network;
+            searchNetwork.appendChild(option);
+        });
+    }
+    
+    if (searchCity) {
+        searchCity.innerHTML = '<option value="">Выберите город</option>';
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            option.textContent = city;
+            searchCity.appendChild(option);
+        });
+    }
+    
+    if (networkFilter && cityFilter) {
+        networkFilter.addEventListener('change', filterLeaderboard);
+        cityFilter.addEventListener('change', filterLeaderboard);
+    }
 }
 
 // Функция для фильтрации таблицы
 function filterLeaderboard() {
     if (currentLeaderboardType !== 'overall' || !currentData || currentData.length === 0) return;
     
-    const networkFilter = document.getElementById('networkFilter').value;
-    const cityFilter = document.getElementById('cityFilter').value;
+    const networkFilter = document.getElementById('networkFilter');
+    const cityFilter = document.getElementById('cityFilter');
     const tbody = document.getElementById('leaderboardBody');
+    const table = document.getElementById('leaderboardTable');
+    const noData = document.getElementById('noData');
+    
+    if (!networkFilter || !cityFilter || !tbody) return;
+    
+    const networkValue = networkFilter.value;
+    const cityValue = cityFilter.value;
     
     tbody.innerHTML = '';
     
     const filteredData = currentData.filter(participant => {
-        const networkMatch = !networkFilter || participant.network === networkFilter;
-        const cityMatch = !cityFilter || participant.city === cityFilter;
+        const networkMatch = !networkValue || participant.network === networkValue;
+        const cityMatch = !cityValue || participant.city === cityValue;
         return networkMatch && cityMatch;
     });
     
@@ -332,9 +386,6 @@ function filterLeaderboard() {
         `;
         tbody.appendChild(row);
     });
-    
-    const table = document.getElementById('leaderboardTable');
-    const noData = document.getElementById('noData');
     
     if (filteredData.length === 0) {
         table.style.display = 'none';
@@ -359,43 +410,48 @@ function switchLeaderboardType(type) {
     const leaderboardTable = document.getElementById('leaderboardTable');
     const loading = document.getElementById('loading');
     const noData = document.getElementById('noData');
+    const searchResults = document.getElementById('searchResults');
+    const searchNoData = document.getElementById('searchNoData');
     
     // Сбрасываем активные классы
-    overallBtn.classList.remove('active');
-    categoryBtn.classList.remove('active');
-    searchBtn.classList.remove('active');
+    if (overallBtn) overallBtn.classList.remove('active');
+    if (categoryBtn) categoryBtn.classList.remove('active');
+    if (searchBtn) searchBtn.classList.remove('active');
     
     // Скрываем все секции
-    filters.style.display = 'none';
-    categorySelector.style.display = 'none';
-    searchSection.style.display = 'none';
-    leaderboardTable.style.display = 'none';
-    loading.style.display = 'none';
-    noData.style.display = 'none';
+    if (filters) filters.style.display = 'none';
+    if (categorySelector) categorySelector.style.display = 'none';
+    if (searchSection) searchSection.style.display = 'none';
+    if (leaderboardTable) leaderboardTable.style.display = 'none';
+    if (loading) loading.style.display = 'none';
+    if (noData) noData.style.display = 'none';
+    if (searchResults) searchResults.style.display = 'none';
+    if (searchNoData) searchNoData.style.display = 'none';
     
     if (type === 'overall') {
-        overallBtn.classList.add('active');
-        filters.style.display = 'flex';
+        if (overallBtn) overallBtn.classList.add('active');
+        if (filters) filters.style.display = 'flex';
         loadOverallLeaderboard(false);
     } else if (type === 'category') {
-        categoryBtn.classList.add('active');
-        categorySelector.style.display = 'flex';
-        // Восстанавливаем выбранную категорию
+        if (categoryBtn) categoryBtn.classList.add('active');
+        if (categorySelector) categorySelector.style.display = 'flex';
         if (currentCategory) {
-            document.getElementById('categoryFilter').value = currentCategory;
+            const categoryFilter = document.getElementById('categoryFilter');
+            if (categoryFilter) categoryFilter.value = currentCategory;
             loadCategoryLeaderboard(currentCategory);
         }
     } else if (type === 'search') {
-        searchBtn.classList.add('active');
-        searchSection.style.display = 'block';
-        // Очищаем предыдущие результаты поиска
-        document.getElementById('searchResults').style.display = 'none';
-        document.getElementById('searchNoData').style.display = 'none';
+        if (searchBtn) searchBtn.classList.add('active');
+        if (searchSection) searchSection.style.display = 'block';
         
         // Восстанавливаем значения полей поиска
-        document.getElementById('searchParticipant').value = currentSearchParticipant;
-        document.getElementById('searchNetwork').value = currentSearchNetwork;
-        document.getElementById('searchCity').value = currentSearchCity;
+        const searchParticipantInput = document.getElementById('searchParticipant');
+        const searchNetworkSelect = document.getElementById('searchNetwork');
+        const searchCitySelect = document.getElementById('searchCity');
+        
+        if (searchParticipantInput) searchParticipantInput.value = currentSearchParticipant;
+        if (searchNetworkSelect) searchNetworkSelect.value = currentSearchNetwork;
+        if (searchCitySelect) searchCitySelect.value = currentSearchCity;
         
         // Восстанавливаем результаты поиска, если они есть
         if (currentSearchResults) {
@@ -410,19 +466,20 @@ async function refreshLeaderboard() {
     
     const refreshBtn = document.getElementById('refreshBtn');
     refreshInProgress = true;
-    refreshBtn.disabled = true;
-    refreshBtn.classList.add('loading');
+    if (refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.classList.add('loading');
+    }
     
     try {
         if (currentLeaderboardType === 'overall') {
             await loadOverallLeaderboard(true);
         } else if (currentLeaderboardType === 'category') {
-            const category = document.getElementById('categoryFilter').value;
-            if (category) {
-                await loadCategoryLeaderboard(category);
+            const categoryFilter = document.getElementById('categoryFilter');
+            if (categoryFilter && categoryFilter.value) {
+                await loadCategoryLeaderboard(categoryFilter.value);
             }
         } else if (currentLeaderboardType === 'search') {
-            // Обновляем результаты поиска
             const participantName = document.getElementById('searchParticipant').value.trim();
             const network = document.getElementById('searchNetwork').value;
             const city = document.getElementById('searchCity').value;
@@ -438,8 +495,11 @@ async function refreshLeaderboard() {
         showTempMessage('Ошибка при обновлении данных', 'error');
     } finally {
         refreshInProgress = false;
-        refreshBtn.disabled = false;
-        refreshBtn.classList.remove('loading');
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.disabled = false;
+            refreshBtn.classList.remove('loading');
+        }
     }
 }
 
@@ -460,17 +520,28 @@ function showTempMessage(message, type = 'info') {
         transition: all 0.3s ease;
         opacity: 0;
         transform: translateY(-10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
     `;
+    
+    if (type === 'success') {
+        messageEl.style.background = 'linear-gradient(45deg, #4CAF50 0%, #45a049 100%)';
+        messageEl.style.borderLeft = '4px solid #2E7D32';
+    } else if (type === 'error') {
+        messageEl.style.background = 'linear-gradient(45deg, #f44336 0%, #d32f2f 100%)';
+        messageEl.style.borderLeft = '4px solid #C62828';
+    } else {
+        messageEl.style.background = 'linear-gradient(45deg, #2196F3 0%, #1976D2 100%)';
+        messageEl.style.borderLeft = '4px solid #1565C0';
+    }
     
     document.body.appendChild(messageEl);
     
-    // Анимация появления
     setTimeout(() => {
         messageEl.style.opacity = '1';
         messageEl.style.transform = 'translateY(0)';
     }, 10);
     
-    // Автоматическое скрытие через 3 секунды
     setTimeout(() => {
         messageEl.style.opacity = '0';
         messageEl.style.transform = 'translateY(-10px)';
@@ -511,59 +582,76 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Обработчик для выбора категории
-    document.getElementById('categoryFilter').addEventListener('change', function() {
-        currentCategory = this.value;
-        if (currentCategory) {
-            loadCategoryLeaderboard(currentCategory);
-        } else {
-            const table = document.getElementById('leaderboardTable');
-            const tbody = document.getElementById('leaderboardBody');
-            const noData = document.getElementById('noData');
-            
-            table.style.display = 'none';
-            tbody.innerHTML = '';
-            noData.style.display = 'block';
-            noData.innerHTML = '<p>Выберите категорию для просмотра</p>';
-        }
-    });
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', function() {
+            currentCategory = this.value;
+            if (currentCategory) {
+                loadCategoryLeaderboard(currentCategory);
+            } else {
+                const table = document.getElementById('leaderboardTable');
+                const tbody = document.getElementById('leaderboardBody');
+                const noData = document.getElementById('noData');
+                
+                if (table) table.style.display = 'none';
+                if (tbody) tbody.innerHTML = '';
+                if (noData) {
+                    noData.style.display = 'block';
+                    noData.innerHTML = '<p>Выберите категорию для просмотра</p>';
+                }
+            }
+        });
+    }
 
     // Обработчик для кнопки обновления
-    document.getElementById('refreshBtn').addEventListener('click', refreshLeaderboard);
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', refreshLeaderboard);
+    }
     
-    // Обработчик для кнопки поиска (с проверкой обязательных полей)
-    document.getElementById('searchBtn').addEventListener('click', function() {
-        const participantName = document.getElementById('searchParticipant').value.trim();
-        const network = document.getElementById('searchNetwork').value;
-        const city = document.getElementById('searchCity').value;
-        
-        if (participantName && network && city) {
-            currentSearchParticipant = participantName;
-            currentSearchNetwork = network;
-            currentSearchCity = city;
-            searchParticipant(participantName, network, city);
-        } else {
-            if (!participantName) {
-                showTempMessage('Пожалуйста, введите имя участника', 'error');
-                document.getElementById('searchParticipant').focus();
-            } else if (!network) {
-                showTempMessage('Пожалуйста, выберите сеть', 'error');
-                document.getElementById('searchNetwork').focus();
-            } else if (!city) {
-                showTempMessage('Пожалуйста, выберите город', 'error');
-                document.getElementById('searchCity').focus();
+    // Обработчик для кнопки поиска
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function() {
+            const participantName = document.getElementById('searchParticipant').value.trim();
+            const network = document.getElementById('searchNetwork').value;
+            const city = document.getElementById('searchCity').value;
+            
+            if (participantName && network && city) {
+                currentSearchParticipant = participantName;
+                currentSearchNetwork = network;
+                currentSearchCity = city;
+                searchParticipant(participantName, network, city);
+            } else {
+                if (!participantName) {
+                    showTempMessage('Пожалуйста, введите имя участника', 'error');
+                    document.getElementById('searchParticipant').focus();
+                } else if (!network) {
+                    showTempMessage('Пожалуйста, выберите сеть', 'error');
+                    document.getElementById('searchNetwork').focus();
+                } else if (!city) {
+                    showTempMessage('Пожалуйста, выберите город', 'error');
+                    document.getElementById('searchCity').focus();
+                }
             }
-        }
-    });
+        });
+    }
     
     // Добавляем поддержку поиска по Enter
-    document.getElementById('searchParticipant').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('searchBtn').click();
-        }
-    });
+    const searchParticipantInput = document.getElementById('searchParticipant');
+    if (searchParticipantInput) {
+        searchParticipantInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('searchBtn').click();
+            }
+        });
+    }
     
     // Обработчик для кнопки закрытия вкладки
-    document.getElementById('closeTabBtn').addEventListener('click', closeTab);
+    const closeTabBtn = document.getElementById('closeTabBtn');
+    if (closeTabBtn) {
+        closeTabBtn.addEventListener('click', closeTab);
+    }
     
     // Добавляем поддержку обновления по F5
     document.addEventListener('keydown', function(e) {
