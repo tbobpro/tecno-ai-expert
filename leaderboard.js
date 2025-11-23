@@ -1,6 +1,6 @@
-// leaderboard.js - Исправленная версия с улучшенной обработкой ошибок
+// leaderboard.js - Исправленная версия
 
-const scriptURL = 'https://script.google.com/macros/s/AKfycbyUQgP0rrFOHJl77YotZrGloeu8jRn7M3hIlWYEo8iQZ2EQxWBkS2P0pvL1_lpJk50Q/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbylDxSX96dB6MmlqK0pr5xFxMM1mqUTlECAUV6Qru1beyUJDKQ_e0LhKrtdBfynoVjI/exec';
 
 // Глобальные переменные
 let currentLeaderboardType = 'overall';
@@ -10,6 +10,7 @@ let currentCategory = '';
 let currentSearchParticipant = '';
 let currentSearchNetwork = '';
 let currentSearchCity = '';
+let currentSearchResults = null;
 let isInitialLoad = true;
 let refreshInProgress = false;
 
@@ -75,15 +76,9 @@ async function loadOverallLeaderboard(forceRefresh = false) {
         const timestamp = new Date().getTime();
         const url = `${scriptURL}?action=getLeaderboard&t=${timestamp}`;
         
-        console.log('Загрузка данных по URL:', url);
+        console.log('Загрузка общего зачета по URL:', url);
         
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        const response = await fetch(url);
         
         console.log('Статус ответа:', response.status);
         
@@ -120,7 +115,7 @@ async function loadOverallLeaderboard(forceRefresh = false) {
         }
         
     } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
+        console.error('Ошибка загрузки общего зачета:', error);
         const loading = document.getElementById('loading');
         const noData = document.getElementById('noData');
         
@@ -157,10 +152,7 @@ async function loadCategoryLeaderboard(category) {
         
         console.log('Загрузка категории по URL:', url);
         
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors'
-        });
+        const response = await fetch(url);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -249,10 +241,7 @@ async function searchParticipant(participantName, network, city) {
         const url = `${scriptURL}?${params.toString()}`;
         console.log('Поиск участника по URL:', url);
         
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors'
-        });
+        const response = await fetch(url);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -270,9 +259,11 @@ async function searchParticipant(participantName, network, city) {
         }
         
         if (data.result === 'success' && data.data && data.data.length > 0) {
+            currentSearchResults = data.data;
             renderSearchResults(data.data, participantName, network, city);
             showTempMessage('Участник найден!', 'success');
         } else {
+            currentSearchResults = null;
             searchNoData.style.display = 'block';
             searchNoData.innerHTML = `<p>Участник "${participantName}"${network ? ` в сети "${network}"` : ''}${city ? ` в городе "${city}"` : ''} не найден или не имеет результатов</p>`;
             showTempMessage('Участник не найден', 'info');
@@ -336,13 +327,19 @@ function renderSearchResults(data, participantName, network, city) {
 
 // Функция для заполнения фильтров
 function populateFilters(data) {
-    const networks = [...new Set(data.map(p => p.network))].filter(n => n);
-    const cities = [...new Set(data.map(p => p.city))].filter(c => c);
+    const networks = [...new Set(data.map(p => p.network).filter(n => n && n.trim() !== ''))].sort();
+    const cities = [...new Set(data.map(p => p.city).filter(c => c && c.trim() !== ''))].sort();
     
     const networkFilter = document.getElementById('networkFilter');
     const cityFilter = document.getElementById('cityFilter');
     const searchNetwork = document.getElementById('searchNetwork');
     const searchCity = document.getElementById('searchCity');
+    
+    // Очищаем существующие опции (кроме первой)
+    clearSelectOptions(networkFilter);
+    clearSelectOptions(cityFilter);
+    clearSelectOptions(searchNetwork);
+    clearSelectOptions(searchCity);
     
     // Заполняем фильтры для общего зачета
     networks.forEach(network => {
@@ -365,8 +362,16 @@ function populateFilters(data) {
         searchCity.appendChild(searchOption);
     });
     
+    // Добавляем обработчики событий
     networkFilter.addEventListener('change', filterLeaderboard);
     cityFilter.addEventListener('change', filterLeaderboard);
+}
+
+// Функция для очистки опций select (кроме первой)
+function clearSelectOptions(selectElement) {
+    while (selectElement.options.length > 1) {
+        selectElement.remove(1);
+    }
 }
 
 // Функция для фильтрации таблицы
@@ -453,9 +458,16 @@ function switchLeaderboardType(type) {
     } else if (type === 'search') {
         searchBtn.classList.add('active');
         searchSection.style.display = 'block';
-        // Очищаем предыдущие результаты поиска
-        document.getElementById('searchResults').style.display = 'none';
-        document.getElementById('searchNoData').style.display = 'none';
+        
+        // Восстанавливаем значения полей поиска
+        document.getElementById('searchParticipant').value = currentSearchParticipant;
+        document.getElementById('searchNetwork').value = currentSearchNetwork;
+        document.getElementById('searchCity').value = currentSearchCity;
+        
+        // Восстанавливаем результаты поиска, если они есть
+        if (currentSearchResults) {
+            renderSearchResults(currentSearchResults, currentSearchParticipant, currentSearchNetwork, currentSearchCity);
+        }
     }
 }
 
