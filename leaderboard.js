@@ -1,4 +1,4 @@
-// leaderboard.js - Полностью обновленная версия с поиском участника
+// leaderboard.js - Исправленная версия с улучшенной обработкой ошибок
 
 const scriptURL = 'https://script.google.com/macros/s/AKfycbylDxSX96dB6MmlqK0pr5xFxMM1mqUTlECAUV6Qru1beyUJDKQ_e0LhKrtdBfynoVjI/exec';
 
@@ -56,7 +56,7 @@ function renderOverallLeaderboard(data) {
     }
 }
 
-// Функция для загрузки общего лидерборда
+// Улучшенная функция для загрузки общего лидерборда
 async function loadOverallLeaderboard(forceRefresh = false) {
     if (cachedOverallData && !forceRefresh) {
         currentData = cachedOverallData;
@@ -66,33 +66,73 @@ async function loadOverallLeaderboard(forceRefresh = false) {
     
     try {
         const loading = document.getElementById('loading');
-        loading.style.display = 'block';
+        const noData = document.getElementById('noData');
         
-        const response = await fetch(scriptURL + '?action=getLeaderboard&t=' + new Date().getTime());
+        loading.style.display = 'block';
+        noData.style.display = 'none';
+        
+        // Добавляем timestamp для предотвращения кэширования
+        const timestamp = new Date().getTime();
+        const url = `${scriptURL}?action=getLeaderboard&t=${timestamp}`;
+        
+        console.log('Загрузка данных по URL:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        console.log('Статус ответа:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
+        const responseText = await response.text();
+        console.log('Получен ответ:', responseText);
         
-        cachedOverallData = data;
-        currentData = data;
-        
-        renderOverallLeaderboard(data);
-        
-        if (isInitialLoad) {
-            populateFilters(data);
-            isInitialLoad = false;
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('Ошибка парсинга JSON:', parseError);
+            throw new Error('Неверный формат данных от сервера');
         }
+        
+        // Проверяем структуру ответа
+        if (data && data.result === 'success' && Array.isArray(data.data)) {
+            cachedOverallData = data.data;
+            currentData = data.data;
+            
+            renderOverallLeaderboard(data.data);
+            
+            if (isInitialLoad) {
+                populateFilters(data.data);
+                isInitialLoad = false;
+            }
+        } else if (data && data.result === 'error') {
+            throw new Error(data.message || 'Ошибка сервера');
+        } else {
+            throw new Error('Неверный формат данных');
+        }
+        
     } catch (error) {
         console.error('Ошибка загрузки данных:', error);
         const loading = document.getElementById('loading');
-        loading.style.display = 'none';
-        
         const noData = document.getElementById('noData');
+        
+        loading.style.display = 'none';
         noData.style.display = 'block';
-        noData.innerHTML = '<p>Ошибка загрузки данных. Проверьте подключение к интернету.</p>';
+        noData.innerHTML = `
+            <p>Ошибка загрузки данных: ${error.message}</p>
+            <p>Проверьте подключение к интернету и попробуйте обновить страницу.</p>
+            <button onclick="loadOverallLeaderboard(true)" class="refresh-btn" style="margin-top: 10px;">
+                <i class="fas fa-sync-alt"></i> Попробовать снова
+            </button>
+        `;
         
         currentData = [];
     }
@@ -104,64 +144,81 @@ async function loadCategoryLeaderboard(category) {
     
     try {
         const loading = document.getElementById('loading');
-        loading.style.display = 'block';
-        
-        const response = await fetch(scriptURL + '?action=getCategoryLeaderboard&category=' + encodeURIComponent(category) + '&t=' + new Date().getTime());
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
         const table = document.getElementById('leaderboardTable');
         const tbody = document.getElementById('leaderboardBody');
         const tableHeader = document.getElementById('tableHeader');
         const noData = document.getElementById('noData');
         
-        if (data && data.length > 0) {
-            tableHeader.innerHTML = `
-                <th class="rank">Место</th>
-                <th>Участник</th>
-                <th>Должность</th>
-                <th>Город</th>
-                <th>Сеть</th>
-                <th>Время</th>
-                <th>Дата</th>
-            `;
-            
-            tbody.innerHTML = '';
-            data.forEach((participant, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="rank rank-${index + 1}">${index + 1}</td>
-                    <td class="participant-name">${participant.participant}</td>
-                    <td>${participant.participantRole}</td>
-                    <td>${participant.city}</td>
-                    <td>${participant.network}</td>
-                    <td>${participant.time}</td>
-                    <td>${participant.date}</td>
-                `;
-                tbody.appendChild(row);
-            });
-            
-            loading.style.display = 'none';
-            table.style.display = 'table';
-            noData.style.display = 'none';
-        } else {
-            loading.style.display = 'none';
-            table.style.display = 'none';
-            noData.style.display = 'block';
-            noData.innerHTML = '<p>Нет данных для выбранной категории</p>';
+        loading.style.display = 'block';
+        noData.style.display = 'none';
+        
+        const timestamp = new Date().getTime();
+        const url = `${scriptURL}?action=getCategoryLeaderboard&category=${encodeURIComponent(category)}&t=${timestamp}`;
+        
+        console.log('Загрузка категории по URL:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const responseText = await response.text();
+        const result = JSON.parse(responseText);
+        
+        if (result.result === 'success' && Array.isArray(result.data)) {
+            const data = result.data;
+            
+            if (data && data.length > 0) {
+                tableHeader.innerHTML = `
+                    <th class="rank">Место</th>
+                    <th>Участник</th>
+                    <th>Должность</th>
+                    <th>Город</th>
+                    <th>Сеть</th>
+                    <th>Время</th>
+                    <th>Дата</th>
+                `;
+                
+                tbody.innerHTML = '';
+                data.forEach((participant, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="rank rank-${index + 1}">${index + 1}</td>
+                        <td class="participant-name">${participant.participant}</td>
+                        <td>${participant.participantRole}</td>
+                        <td>${participant.city}</td>
+                        <td>${participant.network}</td>
+                        <td>${participant.time}</td>
+                        <td>${participant.date}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                loading.style.display = 'none';
+                table.style.display = 'table';
+                noData.style.display = 'none';
+            } else {
+                loading.style.display = 'none';
+                table.style.display = 'none';
+                noData.style.display = 'block';
+                noData.innerHTML = '<p>Нет данных для выбранной категории</p>';
+            }
+        } else {
+            throw new Error(result.message || 'Ошибка загрузки данных категории');
+        }
+        
     } catch (error) {
         console.error('Ошибка загрузки данных категории:', error);
         const loading = document.getElementById('loading');
-        loading.style.display = 'none';
-        
         const noData = document.getElementById('noData');
+        
+        loading.style.display = 'none';
         noData.style.display = 'block';
-        noData.innerHTML = '<p>Ошибка загрузки данных. Попробуйте обновить страницу.</p>';
+        noData.innerHTML = `<p>Ошибка загрузки данных: ${error.message}</p>`;
     }
 }
 
@@ -178,6 +235,7 @@ async function searchParticipant(participantName, network, city) {
         searchBtn.classList.add('loading');
         searchResults.style.display = 'none';
         searchNoData.style.display = 'none';
+        loading.style.display = 'block';
         
         const params = new URLSearchParams({
             action: 'searchParticipant',
@@ -188,14 +246,22 @@ async function searchParticipant(participantName, network, city) {
         if (network) params.append('network', network);
         if (city) params.append('city', city);
         
-        const response = await fetch(scriptURL + '?' + params.toString());
+        const url = `${scriptURL}?${params.toString()}`;
+        console.log('Поиск участника по URL:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors'
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
+        const responseText = await response.text();
+        const data = JSON.parse(responseText);
         
+        loading.style.display = 'none';
         searchBtn.disabled = false;
         searchBtn.classList.remove('loading');
         
@@ -203,8 +269,8 @@ async function searchParticipant(participantName, network, city) {
             throw new Error(data.error);
         }
         
-        if (data.length > 0) {
-            renderSearchResults(data, participantName, network, city);
+        if (data.result === 'success' && data.data && data.data.length > 0) {
+            renderSearchResults(data.data, participantName, network, city);
             showTempMessage('Участник найден!', 'success');
         } else {
             searchNoData.style.display = 'block';
@@ -215,12 +281,15 @@ async function searchParticipant(participantName, network, city) {
     } catch (error) {
         console.error('Ошибка поиска:', error);
         const searchBtn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        
+        loading.style.display = 'none';
         searchBtn.disabled = false;
         searchBtn.classList.remove('loading');
         
         const searchNoData = document.getElementById('searchNoData');
         searchNoData.style.display = 'block';
-        searchNoData.innerHTML = '<p>Ошибка при поиске участника. Попробуйте еще раз.</p>';
+        searchNoData.innerHTML = `<p>Ошибка при поиске участника: ${error.message}</p>`;
         showTempMessage('Ошибка при поиске', 'error');
     }
 }
@@ -431,6 +500,10 @@ async function refreshLeaderboard() {
 
 // Функция для показа временного сообщения
 function showTempMessage(message, type = 'info') {
+    // Удаляем существующие сообщения
+    const existingMessages = document.querySelectorAll('.temp-message');
+    existingMessages.forEach(msg => msg.remove());
+    
     const messageEl = document.createElement('div');
     messageEl.className = `temp-message temp-message-${type}`;
     messageEl.textContent = message;
@@ -550,4 +623,11 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshLeaderboard();
         }
     });
+    
+    // Периодическое обновление данных каждые 2 минуты
+    setInterval(() => {
+        if (currentLeaderboardType === 'overall') {
+            loadOverallLeaderboard(true);
+        }
+    }, 120000);
 });
