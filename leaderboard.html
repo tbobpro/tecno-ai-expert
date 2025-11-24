@@ -65,53 +65,53 @@
             </select>
         </div>
 
-        <!-- Секция поиска участника -->
-        <div class="search-section" id="searchSection" style="display: none;">
-            <div class="search-form">
-                <div class="form-group">
-                    <label for="searchParticipant">Имя и фамилия участника:</label>
-                    <input type="text" id="searchParticipant" placeholder="Введите имя и фамилию участника">
-                </div>
-                <div class="form-group">
-                    <label for="searchNetwork">Сеть:</label>
-                    <select id="searchNetwork" class="filter-select">
-                        <option value="">Все сети</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="searchCity">Город:</label>
-                    <select id="searchCity" class="filter-select">
-                        <option value="">Все города</option>
-                    </select>
-                </div>
-                <button id="searchBtn" class="search-btn">
-                    <i class="fas fa-search"></i> Найти участника
-                </button>
-            </div>
-            
-            <div id="searchResults" class="search-results" style="display: none;">
-                <h3>Результаты поиска</h3>
-                <div class="participant-info" id="participantInfo"></div>
-                <div class="table-container">
-                    <table class="search-results-table">
-                        <thead>
-                            <tr>
-                                <th>Категория</th>
-                                <th>Лучшее время</th>
-                                <th>Место</th>
-                                <th>Всего участников</th>
-                            </tr>
-                        </thead>
-                        <tbody id="searchResultsBody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div id="searchNoData" class="no-data" style="display: none;">
-                <p>Участник не найден или не имеет результатов</p>
-            </div>
+<!-- Секция поиска участника -->
+<div class="search-section" id="searchSection" style="display: none;">
+    <div class="search-form">
+        <div class="form-group">
+            <label for="searchParticipant">Имя и фамилия участника:</label>
+            <input type="text" id="searchParticipant" placeholder="Введите имя и фамилию участника" required>
         </div>
+        <div class="form-group">
+            <label for="searchNetwork">Сеть:</label>
+            <select id="searchNetwork" class="filter-select" required>
+                <option value="">Выберите сеть</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="searchCity">Город:</label>
+            <select id="searchCity" class="filter-select" required>
+                <option value="">Выберите город</option>
+            </select>
+        </div>
+        <button id="searchBtn" class="search-btn">
+            <i class="fas fa-search"></i> Найти участника
+        </button>
+    </div>
+    
+    <div id="searchResults" class="search-results" style="display: none;">
+        <h3>Результаты поиска</h3>
+        <div class="participant-info" id="participantInfo"></div>
+        <div class="table-container">
+            <table class="search-results-table">
+                <thead>
+                    <tr>
+                        <th>Категория</th>
+                        <th>Лучшее время</th>
+                        <th>Место</th>
+                        <th>Всего участников</th>
+                    </tr>
+                </thead>
+                <tbody id="searchResultsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div id="searchNoData" class="no-data" style="display: none;">
+        <p>Участник не найден или не имеет результатов</p>
+    </div>
+</div>
 
         <div id="loading" class="loading">
             <div class="loading-spinner"></div>
