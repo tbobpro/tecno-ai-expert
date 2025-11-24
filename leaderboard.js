@@ -340,9 +340,15 @@ async function loadCategoryLeaderboard(category) {
     }
 }
 
-// Функция для поиска участника
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ: Поиск участника с обязательными полями
 async function searchParticipant(participantName, network, city) {
     try {
+        // ИЗМЕНЕНИЕ: Проверка обязательных полей
+        if (!network || !city) {
+            showTempMessage('Для поиска необходимо выбрать сеть и город', 'error');
+            return;
+        }
+
         const searchBtn = document.getElementById('searchBtn');
         const loading = document.getElementById('loading');
         const searchResults = document.getElementById('searchResults');
@@ -358,11 +364,10 @@ async function searchParticipant(participantName, network, city) {
         const params = new URLSearchParams({
             action: 'searchParticipant',
             participant: participantName,
+            network: network,
+            city: city,
             t: new Date().getTime()
         });
-        
-        if (network) params.append('network', network);
-        if (city) params.append('city', city);
         
         const url = `${scriptURL}?${params.toString()}`;
         console.log('Поиск участника по URL:', url);
@@ -380,8 +385,8 @@ async function searchParticipant(participantName, network, city) {
         searchBtn.disabled = false;
         searchBtn.classList.remove('loading');
         
-        if (data.error) {
-            throw new Error(data.error);
+        if (data.result === 'error') {
+            throw new Error(data.message || 'Ошибка сервера');
         }
         
         if (data.result === 'success' && data.data && data.data.length > 0) {
@@ -391,7 +396,7 @@ async function searchParticipant(participantName, network, city) {
         } else {
             currentSearchResults = null;
             searchNoData.style.display = 'block';
-            searchNoData.innerHTML = `<p>Участник "${participantName}"${network ? ` в сети "${network}"` : ''}${city ? ` в городе "${city}"` : ''} не найден или не имеет результатов</p>`;
+            searchNoData.innerHTML = `<p>Участник "${participantName}" в сети "${network}" в городе "${city}" не найден или не имеет результатов</p>`;
             showTempMessage('Участник не найден', 'info');
         }
         
@@ -420,8 +425,8 @@ function renderSearchResults(data, participantName, network, city) {
     
     // Обновляем информацию об участнике
     let infoHTML = `<strong>Участник:</strong> ${participantName}`;
-    if (network) infoHTML += `<br><strong>Сеть:</strong> ${network}`;
-    if (city) infoHTML += `<br><strong>Город:</strong> ${city}`;
+    infoHTML += `<br><strong>Сеть:</strong> ${network}`;
+    infoHTML += `<br><strong>Город:</strong> ${city}`;
     infoHTML += `<br><strong>Найдено категорий:</strong> ${data.length}`;
     
     participantInfo.innerHTML = infoHTML;
@@ -529,7 +534,7 @@ async function refreshLeaderboard() {
             const network = document.getElementById('searchNetwork').value;
             const city = document.getElementById('searchCity').value;
             
-            if (participantName) {
+            if (participantName && network && city) {
                 await searchParticipant(participantName, network, city);
             }
         }
@@ -636,21 +641,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработчик для кнопки обновления
     document.getElementById('refreshBtn').addEventListener('click', refreshLeaderboard);
     
-    // Обработчик для кнопки поиска
+    // ИСПРАВЛЕННЫЙ ОБРАБОТЧИК: Поиск участника с проверкой обязательных полей
     document.getElementById('searchBtn').addEventListener('click', function() {
         const participantName = document.getElementById('searchParticipant').value.trim();
         const network = document.getElementById('searchNetwork').value;
         const city = document.getElementById('searchCity').value;
         
-        if (participantName) {
-            currentSearchParticipant = participantName;
-            currentSearchNetwork = network;
-            currentSearchCity = city;
-            searchParticipant(participantName, network, city);
-        } else {
+        // Проверка заполнения всех обязательных полей
+        if (!participantName) {
             showTempMessage('Пожалуйста, введите имя участника', 'error');
             document.getElementById('searchParticipant').focus();
+            return;
         }
+        
+        if (!network) {
+            showTempMessage('Пожалуйста, выберите сеть', 'error');
+            document.getElementById('searchNetwork').focus();
+            return;
+        }
+        
+        if (!city) {
+            showTempMessage('Пожалуйста, выберите город', 'error');
+            document.getElementById('searchCity').focus();
+            return;
+        }
+        
+        currentSearchParticipant = participantName;
+        currentSearchNetwork = network;
+        currentSearchCity = city;
+        searchParticipant(participantName, network, city);
     });
     
     // Добавляем поддержку поиска по Enter
