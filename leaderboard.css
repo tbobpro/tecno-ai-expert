@@ -932,3 +932,35 @@ p, td, th {
     backface-visibility: hidden;
     perspective: 1000px;
 }
+
+
+/* Стили для обязательных полей */
+.search-form input:required,
+.search-form select:required {
+    border-left: 3px solid #ff6b6b;
+}
+
+.search-form input:valid,
+.search-form select:valid {
+    border-left: 3px solid #51cf66;
+}
+
+/* Подсветка незаполненных обязательных полей */
+.search-form input:invalid:not(:focus):not(:placeholder-shown),
+.search-form select:invalid:not(:focus) {
+    border-color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+}
+
+/* Стили для сообщений об ошибках */
+.search-form .error-message {
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    display: none;
+}
+
+.search-form input:invalid:not(:focus):not(:placeholder-shown) ~ .error-message,
+.search-form select:invalid:not(:focus) ~ .error-message {
+    display: block;
+}
