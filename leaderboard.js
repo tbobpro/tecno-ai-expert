@@ -691,9 +691,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Периодическое обновление данных каждые 2 минуты
-    setInterval(() => {
+    /*
+setInterval(() => {
         if (currentLeaderboardType === 'overall') {
             loadOverallLeaderboard(true);
         }
     }, 120000);
+    */
 });
