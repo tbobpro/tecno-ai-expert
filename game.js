@@ -13,9 +13,11 @@ let participantName = '';
 let participantRole = '';
 let hostName = '';
 let network = '';
+let telecomNetworkName = '';
 let city = '';
 let storeAddress = '';
 let storeCode = '';
+let deviceModel = '';
 let currentCardText = '';
 let gameResults = [];
 let usedCardTexts = [];
@@ -81,7 +83,7 @@ window.cardExplanations = {
 };
 
 // URL скрипта Google Apps
-const scriptURL = 'https://script.google.com/macros/s/AKfycbwRRAd2mVOpCVZ4WaVAnH0v3L1T1rn2scwYlBuVdQ3VGzCVuw5qgxGH9AB9Pa_uvanH/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbxj8GiaqGO8_US2lxx0QJyybARmzo6-1t_P_Ti08WZOv-h7JXkQz83WGax2LjCfHoOJ/exec';
 
 // Инициализация игры при загрузке DOM
 document.addEventListener('DOMContentLoaded', function() {
@@ -179,9 +181,11 @@ function handleSecretLogin() {
         participantRole = randomData.participantRole;
         hostName = randomData.host;
         network = randomData.network;
+        telecomNetworkName = '';
         city = randomData.city;
         storeAddress = randomData.storeAddress;
         storeCode = randomData.storeCode;
+        deviceModel = 'TECNO POVA 6'; // Тестовое устройство
         
         // Устанавливаем тестовый режим
         isTestMode = true;
@@ -234,9 +238,11 @@ function restartGame() {
     participantRole = randomData.participantRole;
     hostName = randomData.host;
     network = randomData.network;
+    telecomNetworkName = '';
     city = randomData.city;
     storeAddress = randomData.storeAddress;
     storeCode = randomData.storeCode;
+    deviceModel = 'TECNO POVA 6';
     
     // Сбрасываем состояние игры
     resetGameState();
@@ -448,160 +454,6 @@ function resetTimer() {
     if (skipBtn) skipBtn.disabled = true;
 }
 
-// Функция для отправки данных о выполненных заданиях в Google Таблицы
-function sendCompletedTaskData(card, time, status) {
-    // Создаем временную форму для отправки данных задания
-    const tempForm = document.createElement('form');
-    tempForm.style.display = 'none';
-    
-    const inputCard = document.createElement('input');
-    inputCard.name = 'Card';
-    inputCard.value = card;
-    
-    const inputTime = document.createElement('input');
-    inputTime.name = 'Time';
-    inputTime.value = time;
-    
-    const inputStatus = document.createElement('input');
-    inputStatus.name = 'Status';
-    inputStatus.value = status;
-    
-    const inputParticipant = document.createElement('input');
-    inputParticipant.name = 'Participant';
-    inputParticipant.value = participantName;
-    
-    const inputParticipantRole = document.createElement('input');
-    inputParticipantRole.name = 'ParticipantRole';
-    inputParticipantRole.value = participantRole;
-    
-    const inputHost = document.createElement('input');
-    inputHost.name = 'Host';
-    inputHost.value = hostName;
-    
-    const inputNetwork = document.createElement('input');
-    inputNetwork.name = 'Network';
-    inputNetwork.value = network;
-    
-    const inputCity = document.createElement('input');
-    inputCity.name = 'City';
-    inputCity.value = city;
-    
-    const inputStoreAddress = document.createElement('input');
-    inputStoreAddress.name = 'StoreAddress';
-    inputStoreAddress.value = storeAddress;
-    
-    const inputStoreCode = document.createElement('input');
-    inputStoreCode.name = 'StoreCode';
-    inputStoreCode.value = storeCode;
-    
-    const inputRound = document.createElement('input');
-    inputRound.name = 'Round';
-    inputRound.value = currentRound;
-    
-    const inputLocalTimestamp = document.createElement('input');
-    inputLocalTimestamp.name = 'LocalTimestamp';
-    inputLocalTimestamp.value = getLocalTimestamp();
-    
-    tempForm.appendChild(inputCard);
-    tempForm.appendChild(inputTime);
-    tempForm.appendChild(inputStatus);
-    tempForm.appendChild(inputParticipant);
-    tempForm.appendChild(inputParticipantRole);
-    tempForm.appendChild(inputHost);
-    tempForm.appendChild(inputNetwork);
-    tempForm.appendChild(inputCity);
-    tempForm.appendChild(inputStoreAddress);
-    tempForm.appendChild(inputStoreCode);
-    tempForm.appendChild(inputRound);
-    tempForm.appendChild(inputLocalTimestamp);
-    
-    document.body.appendChild(tempForm);
-    
-    // Отправляем форму
-    fetch(scriptURL, { 
-        method: 'POST', 
-        body: new FormData(tempForm),
-        mode: 'no-cors'
-    })
-    .then(() => {
-        console.log('Данные задания отправлены (no-cors режим)');
-    })
-    .catch(error => {
-        console.log('Запрос задания выполнен (ошибка CORS проигнорирована)');
-    })
-    .finally(() => {
-        document.body.removeChild(tempForm);
-    });
-}
-
-// Функция для создания и скачивания файла с результатами
-function saveGameResultsToFile() {
-    if (gameResults.length === 0) return;
-    
-    // Создаем CSV содержимое с обратной связью
-    let csvContent = "Дата проведения игры,Время проведения раунда,Раунд,Участник,Должность участника,Ведущий,Карточка,Время,Статус,Комментарий,Сеть,Город,Адрес магазина,Код точки,Обратная связь\n";
-    
-    gameResults.forEach(result => {
-        const row = [
-            result.gameDate,
-            result.roundTime,
-            result.round,
-            `"${result.participant}"`,
-            `"${result.participantRole}"`,
-            `"${result.host}"`,
-            `"${result.card}"`,
-            `"${result.time}"`,
-            `"${result.status}"`,
-            `"${result.comment}"`,
-            `"${result.network}"`,
-            `"${result.city}"`,
-            `"${result.storeAddress}"`,
-            `"${result.storeCode}"`,
-            "" // Обратная связь для отдельных раундов не заполняется
-        ].join(',');
-        
-        csvContent += row + '\n';
-    });
-    
-    // Добавляем итоговую строку с обратной связью
-    const lastResult = gameResults[gameResults.length - 1];
-    const summaryRow = [
-        lastResult.gameDate,
-        lastResult.roundTime,
-        "Итог",
-        `"${lastResult.participant}"`,
-        `"${lastResult.participantRole}"`,
-        `"${lastResult.host}"`,
-        "",
-        `"${formatTime(totalGameTime)}"`,
-        `"Выполнено: ${completedTasksCount}/6"`,
-        "",
-        `"${lastResult.network}"`,
-        `"${lastResult.city}"`,
-        `"${lastResult.storeAddress}"`,
-        `"${lastResult.storeCode}"`,
-        `"${feedback}"` // Добавляем обратную связь
-    ].join(',');
-    
-    csvContent += summaryRow + '\n';
-    
-    // Создаем Blob и ссылку для скачивания
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    
-    // Формируем имя файла с датой, сетью и именем участника
-    const firstResult = gameResults[0];
-    const filename = `TECNO_AI_EXPERT_${firstResult.gameDate}_${firstResult.network}_${firstResult.participant}.csv`;
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
 // Функция для отправки данных в Google Таблицы
 function sendToGoogleSheets(result) {
     // Получаем элементы формы
@@ -614,10 +466,12 @@ function sendToGoogleSheets(result) {
     const formComment = document.getElementById('form-comment');
     const formRound = document.getElementById('form-round');
     const formNetwork = document.getElementById('form-network');
+    const formTelecomNetworkName = document.getElementById('form-telecom-network-name');
     const formCity = document.getElementById('form-city');
     const formStoreAddress = document.getElementById('form-store-address');
     const formStoreCode = document.getElementById('form-store-code');
     const formLocalTimestamp = document.getElementById('form-local-timestamp');
+    const formDeviceModel = document.getElementById('form-device-model');
     const googleForm = document.getElementById('submit-to-google-sheet');
     
     if (!googleForm) return;
@@ -632,10 +486,12 @@ function sendToGoogleSheets(result) {
     if (formComment) formComment.value = result.comment;
     if (formRound) formRound.value = result.round;
     if (formNetwork) formNetwork.value = result.network;
+    if (formTelecomNetworkName) formTelecomNetworkName.value = result.telecomNetworkName || '';
     if (formCity) formCity.value = result.city;
     if (formStoreAddress) formStoreAddress.value = result.storeAddress;
     if (formStoreCode) formStoreCode.value = result.storeCode;
     if (formLocalTimestamp) formLocalTimestamp.value = getLocalTimestamp();
+    if (formDeviceModel) formDeviceModel.value = result.deviceModel;
     
     // Показываем индикатор загрузки
     const loadingIndicator = document.getElementById('loadingIndicator');
@@ -679,28 +535,38 @@ function sendSummaryToGoogleSheets() {
     const formSummaryHost = document.getElementById('form-summary-host');
     const formSummaryCity = document.getElementById('form-summary-city');
     const formSummaryNetwork = document.getElementById('form-summary-network');
+    const formSummaryTelecomNetworkName = document.getElementById('form-summary-telecom-network-name');
     const formSummaryStoreCode = document.getElementById('form-summary-store-code');
     const formSummaryStoreAddress = document.getElementById('form-summary-store-address');
     const formSummaryTimestamp = document.getElementById('form-summary-timestamp');
     const formSummaryCompletedCount = document.getElementById('form-summary-completed-count');
     const formSummaryTotalTime = document.getElementById('form-summary-total-time');
     const formSummaryFeedback = document.getElementById('form-summary-feedback');
+    const formSummaryDeviceModel = document.getElementById('form-summary-device-model');
     const summaryForm = document.getElementById('submit-summary-to-google-sheet');
     
     if (!summaryForm) return;
+    
+    // Формируем полное название сети
+    let fullNetwork = network;
+    if (network === 'TELECOM' && telecomNetworkName) {
+        fullNetwork = `TELECOM: ${telecomNetworkName}`;
+    }
     
     // Заполняем скрытую форму данными
     if (formSummaryParticipant) formSummaryParticipant.value = participantName;
     if (formSummaryParticipantRole) formSummaryParticipantRole.value = participantRole;
     if (formSummaryHost) formSummaryHost.value = hostName;
     if (formSummaryCity) formSummaryCity.value = city;
-    if (formSummaryNetwork) formSummaryNetwork.value = network;
+    if (formSummaryNetwork) formSummaryNetwork.value = fullNetwork;
+    if (formSummaryTelecomNetworkName) formSummaryTelecomNetworkName.value = telecomNetworkName || '';
     if (formSummaryStoreCode) formSummaryStoreCode.value = storeCode;
     if (formSummaryStoreAddress) formSummaryStoreAddress.value = storeAddress;
     if (formSummaryTimestamp) formSummaryTimestamp.value = getLocalTimestamp();
     if (formSummaryCompletedCount) formSummaryCompletedCount.value = completedTasksCount;
     if (formSummaryTotalTime) formSummaryTotalTime.value = formatTime(totalGameTime);
     if (formSummaryFeedback) formSummaryFeedback.value = feedback;
+    if (formSummaryDeviceModel) formSummaryDeviceModel.value = deviceModel;
     
     // Отправляем форму
     fetch(scriptURL, { 
@@ -716,6 +582,84 @@ function sendSummaryToGoogleSheets() {
     });
 }
 
+// Функция для создания и скачивания файла с результатами
+function saveGameResultsToFile() {
+    if (gameResults.length === 0) return;
+    
+    // Формируем полное название сети
+    let fullNetwork = network;
+    if (network === 'TELECOM' && telecomNetworkName) {
+        fullNetwork = `TELECOM: ${telecomNetworkName}`;
+    }
+    
+    // Создаем CSV содержимое с обратной связью
+    let csvContent = "Дата проведения игры,Время проведения раунда,Раунд,Участник,Должность участника,Ведущий,Карточка,Время,Статус,Комментарий,Сеть,Название сети TELECOM,Город,Адрес магазина,Код точки,Модель устройства,Обратная связь\n";
+    
+    gameResults.forEach(result => {
+        const row = [
+            result.gameDate,
+            result.roundTime,
+            result.round,
+            `"${result.participant}"`,
+            `"${result.participantRole}"`,
+            `"${result.host}"`,
+            `"${result.card}"`,
+            `"${result.time}"`,
+            `"${result.status}"`,
+            `"${result.comment}"`,
+            `"${fullNetwork}"`,
+            `"${telecomNetworkName || ''}"`,
+            `"${result.city}"`,
+            `"${result.storeAddress}"`,
+            `"${result.storeCode}"`,
+            `"${deviceModel}"`,
+            "" // Обратная связь для отдельных раундов не заполняется
+        ].join(',');
+        
+        csvContent += row + '\n';
+    });
+    
+    // Добавляем итоговую строку с обратной связью
+    const lastResult = gameResults[gameResults.length - 1];
+    const summaryRow = [
+        lastResult.gameDate,
+        lastResult.roundTime,
+        "Итог",
+        `"${lastResult.participant}"`,
+        `"${lastResult.participantRole}"`,
+        `"${lastResult.host}"`,
+        "",
+        `"${formatTime(totalGameTime)}"`,
+        `"Выполнено: ${completedTasksCount}/6"`,
+        "",
+        `"${fullNetwork}"`,
+        `"${telecomNetworkName || ''}"`,
+        `"${lastResult.city}"`,
+        `"${lastResult.storeAddress}"`,
+        `"${lastResult.storeCode}"`,
+        `"${deviceModel}"`,
+        `"${feedback}"` // Добавляем обратную связь
+    ].join(',');
+    
+    csvContent += summaryRow + '\n';
+    
+    // Создаем Blob и ссылку для скачивания
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    // Формируем имя файла с датой, сетью и именем участника
+    const firstResult = gameResults[0];
+    const filename = `TECNO_AI_EXPERT_${firstResult.gameDate}_${fullNetwork}_${firstResult.participant}.csv`;
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 // Функция для завершения раунда
 function completeRound(status, comment = '') {
     if (status === 'Сделано' && elapsedTime === 0) {
@@ -729,7 +673,6 @@ function completeRound(status, comment = '') {
     // Обновляем счетчик выполненных заданий
     if (status === 'Сделано') {
         completedTasksCount++;
-        // УБРАЛИ вызов sendCompletedTaskData - данные теперь отправляются только через sendToGoogleSheets
     }
     
     const now = new Date();
@@ -746,9 +689,11 @@ function completeRound(status, comment = '') {
         status: status,
         comment: comment,
         network: network,
+        telecomNetworkName: telecomNetworkName,
         city: city,
         storeAddress: storeAddress,
         storeCode: storeCode,
+        deviceModel: deviceModel,
         gameDate: gameDate,
         roundTime: roundTime
     };
@@ -761,7 +706,7 @@ function completeRound(status, comment = '') {
     
     addResultToTable(result);
     
-    // ОТПРАВЛЯЕМ ДАННЫЕ ТОЛЬКО ОДИН РАЗ - через sendToGoogleSheets
+    // ОТПРАВЛЯЕМ ДАННЫЕ через sendToGoogleSheets
     sendToGoogleSheets(result);
     
     resetTimer();
@@ -878,14 +823,17 @@ function handleStartGame() {
     const participantNameInput = document.getElementById('participantName');
     const participantRoleInput = document.getElementById('participantRole');
     const hostNameInput = document.getElementById('hostName');
-    const networkInput = document.getElementById('network');
+    const networkSelect = document.getElementById('network');
+    const telecomNetworkNameInput = document.getElementById('telecomNetworkName');
     const cityInput = document.getElementById('city');
     const storeAddressInput = document.getElementById('storeAddress');
     const storeCodeInput = document.getElementById('storeCode');
+    const deviceModelInput = document.getElementById('deviceModel');
     const confirmationCheckbox = document.getElementById('dataConfirmation');
     
     if (!participantNameInput || !participantRoleInput || !hostNameInput || 
-        !networkInput || !cityInput || !storeAddressInput || !storeCodeInput || !confirmationCheckbox) {
+        !networkSelect || !cityInput || !storeAddressInput || !storeCodeInput || 
+        !deviceModelInput || !confirmationCheckbox) {
         alert('Ошибка: не все поля формы найдены.');
         return;
     }
@@ -893,13 +841,15 @@ function handleStartGame() {
     participantName = participantNameInput.value.trim();
     participantRole = participantRoleInput.value.trim();
     hostName = hostNameInput.value.trim();
-    network = networkInput.value.trim();
+    network = networkSelect.value;
+    telecomNetworkName = telecomNetworkNameInput.value.trim();
     city = cityInput.value.trim();
     storeAddress = storeAddressInput.value.trim();
     storeCode = storeCodeInput.value.trim();
+    deviceModel = deviceModelInput.value.trim();
     const isConfirmed = confirmationCheckbox.checked;
     
-    if (participantName && participantRole && hostName && network && city && storeAddress && storeCode && isConfirmed) {
+    if (participantName && participantRole && hostName && network && city && storeAddress && storeCode && deviceModel && isConfirmed) {
         hideNamesModal();
         gameStarted = true;
         gameStartTime = new Date();
