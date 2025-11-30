@@ -1,4 +1,4 @@
-// leaderboard.js - Полная исправленная версия
+// leaderboard.js - Полная исправленная версия без автообновления
 
 const scriptURL = 'https://script.google.com/macros/s/AKfycbxj8GiaqGO8_US2lxx0QJyybARmzo6-1t_P_Ti08WZOv-h7JXkQz83WGax2LjCfHoOJ/exec';
 
@@ -29,6 +29,7 @@ function renderOverallLeaderboard(data) {
             <th>Должность</th>
             <th>Город</th>
             <th>Сеть</th>
+            <th class="store-address">Адрес магазина</th>
             <th>Общее время</th>
         `;
         
@@ -41,6 +42,7 @@ function renderOverallLeaderboard(data) {
                 <td>${participant.participantRole}</td>
                 <td>${participant.city}</td>
                 <td>${participant.network}</td>
+                <td class="store-address">${participant.storeAddress}</td>
                 <td>${participant.totalTime}</td>
             `;
             tbody.appendChild(row);
@@ -241,6 +243,7 @@ function filterLeaderboard() {
             <td>${participant.participantRole}</td>
             <td>${participant.city}</td>
             <td>${participant.network}</td>
+            <td class="store-address">${participant.storeAddress}</td>
             <td>${participant.totalTime}</td>
         `;
         tbody.appendChild(row);
@@ -297,8 +300,8 @@ async function loadCategoryLeaderboard(category) {
                     <th>Должность</th>
                     <th>Город</th>
                     <th>Сеть</th>
+                    <th class="store-address">Адрес магазина</th>
                     <th>Время</th>
-                    <th>Дата</th>
                 `;
                 
                 tbody.innerHTML = '';
@@ -310,8 +313,8 @@ async function loadCategoryLeaderboard(category) {
                         <td>${participant.participantRole}</td>
                         <td>${participant.city}</td>
                         <td>${participant.network}</td>
+                        <td class="store-address">${participant.storeAddress}</td>
                         <td>${participant.time}</td>
-                        <td>${participant.date}</td>
                     `;
                     tbody.appendChild(row);
                 });
@@ -447,7 +450,6 @@ function renderSearchResults(data, participantName, network, city) {
             <td>${item.bestTime}</td>
             <td class="rank ${rankClass}">${item.rank}</td>
             <td>${item.totalParticipants}</td>
-            <td>${item.date}</td>
         `;
         searchResultsBody.appendChild(row);
     });
@@ -689,13 +691,4 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshLeaderboard();
         }
     });
-    
-    // Периодическое обновление данных каждые 2 минуты
-    /*
-setInterval(() => {
-        if (currentLeaderboardType === 'overall') {
-            loadOverallLeaderboard(true);
-        }
-    }, 120000);
-    */
 });
