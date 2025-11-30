@@ -11,7 +11,27 @@ document.addEventListener('DOMContentLoaded', function() {
     explanationModal = document.getElementById('explanationModal');
     feedbackModal = document.getElementById('feedbackModal');
     body = document.body;
+    
+    // Инициализация обработчика для выпадающего списка сети
+    initializeNetworkSelect();
 });
+
+// Функция для инициализации выпадающего списка сети
+function initializeNetworkSelect() {
+    const networkSelect = document.getElementById('network');
+    const telecomNetworkGroup = document.getElementById('telecomNetworkGroup');
+    
+    if (networkSelect && telecomNetworkGroup) {
+        networkSelect.addEventListener('change', function() {
+            if (this.value === 'TELECOM') {
+                telecomNetworkGroup.style.display = 'block';
+            } else {
+                telecomNetworkGroup.style.display = 'none';
+                document.getElementById('telecomNetworkName').value = '';
+            }
+        });
+    }
+}
 
 // Функция для показа модального окна ввода данных
 function showNamesModal() {
@@ -24,8 +44,16 @@ function showNamesModal() {
         if (confirmationCheckbox) {
             confirmationCheckbox.checked = false;
         }
+        
+        // Сбрасываем поле TELECOM
+        const telecomNetworkGroup = document.getElementById('telecomNetworkGroup');
+        if (telecomNetworkGroup) {
+            telecomNetworkGroup.style.display = 'none';
+            document.getElementById('telecomNetworkName').value = '';
+        }
     }
 }
+
 // Функция для скрытия модального окна ввода данных
 function hideNamesModal() {
     if (namesModal) {
@@ -92,7 +120,7 @@ function hideFeedbackModal() {
 function setupInputScrolling() {
     if (!namesModal) return;
     
-    const inputs = namesModal.querySelectorAll('input');
+    const inputs = namesModal.querySelectorAll('input, select');
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
             this.scrollIntoView({ behavior: 'smooth', block: 'center' });
