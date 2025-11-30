@@ -36,7 +36,21 @@
             </div>
             <div class="form-group">
                 <label for="network">Сеть:</label>
-                <input type="text" id="network" placeholder="Введите название сети">
+                <select id="network" required>
+                    <option value="">Выберите сеть</option>
+                    <option value="ДНС">ДНС</option>
+                    <option value="М.Видео">М.Видео</option>
+                    <option value="Эльдорадо">Эльдорадо</option>
+                    <option value="Телемаркет24">Телемаркет24</option>
+                    <option value="МТС">МТС</option>
+                    <option value="Билайн">Билайн</option>
+                    <option value="Мегафон">Мегафон</option>
+                    <option value="TELECOM">TELECOM</option>
+                </select>
+            </div>
+            <div class="form-group" id="telecomNetworkGroup" style="display: none;">
+                <label for="telecomNetworkName">Название сети TELECOM:</label>
+                <input type="text" id="telecomNetworkName" placeholder="Введите название сети TELECOM (необязательно)">
             </div>
             <div class="form-group">
                 <label for="city">Город:</label>
@@ -50,10 +64,14 @@
                 <label for="storeCode">Код точки:</label>
                 <input type="text" id="storeCode" placeholder="Введите код точки">
             </div>
+            <div class="form-group">
+                <label for="deviceModel">Модель устройства:</label>
+                <input type="text" id="deviceModel" placeholder="Например, TECNO POVA 6" required>
+            </div>
             <div class="form-group confirmation-checkbox">
-    <input type="checkbox" id="dataConfirmation" required>
-    <label for="dataConfirmation">Подтверждаю, что введённые мною (ведущим) данные являются полностью верными.</label>
-</div>
+                <input type="checkbox" id="dataConfirmation" required>
+                <label for="dataConfirmation">Подтверждаю, что введённые мною (ведущим) данные являются полностью верными.</label>
+            </div>
             <div class="modal-buttons">
                 <button id="startGameBtn">Начать игру</button>
             </div>
@@ -132,10 +150,12 @@
         <input name="Comment" type="text" id="form-comment">
         <input name="Round" type="text" id="form-round">
         <input name="Network" type="text" id="form-network">
+        <input name="TelecomNetworkName" type="text" id="form-telecom-network-name">
         <input name="City" type="text" id="form-city">
         <input name="StoreAddress" type="text" id="form-store-address">
         <input name="StoreCode" type="text" id="form-store-code">
         <input name="LocalTimestamp" type="text" id="form-local-timestamp">
+        <input name="DeviceModel" type="text" id="form-device-model">
         <button type="submit" id="form-submit-btn">Send</button>
     </form>
 
@@ -145,12 +165,14 @@
         <input name="Host" type="text" id="form-summary-host">
         <input name="City" type="text" id="form-summary-city">
         <input name="Network" type="text" id="form-summary-network">
+        <input name="TelecomNetworkName" type="text" id="form-summary-telecom-network-name">
         <input name="StoreCode" type="text" id="form-summary-store-code">
         <input name="StoreAddress" type="text" id="form-summary-store-address">
         <input name="LocalTimestamp" type="text" id="form-summary-timestamp">
         <input name="CompletedCount" type="text" id="form-summary-completed-count">
         <input name="TotalTime" type="text" id="form-summary-total-time">
         <input name="Feedback" type="text" id="form-summary-feedback">
+        <input name="DeviceModel" type="text" id="form-summary-device-model">
         <button type="submit" id="form-summary-submit-btn">Send</button>
     </form>
 
