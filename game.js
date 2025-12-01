@@ -185,7 +185,7 @@ function handleSecretLogin() {
         city = randomData.city;
         storeAddress = randomData.storeAddress;
         storeCode = randomData.storeCode;
-        deviceModel = 'TECNO POVA 6'; // Тестовое устройство
+        deviceModel = navigator.userAgent || 'Test Device'; // Получаем User Agent из браузера
         
         // Устанавливаем тестовый режим
         isTestMode = true;
@@ -242,7 +242,7 @@ function restartGame() {
     city = randomData.city;
     storeAddress = randomData.storeAddress;
     storeCode = randomData.storeCode;
-    deviceModel = 'TECNO POVA 6';
+    deviceModel = navigator.userAgent || 'Test Device'; // Получаем User Agent
     
     // Сбрасываем состояние игры
     resetGameState();
@@ -472,6 +472,7 @@ function sendToGoogleSheets(result) {
     const formStoreCode = document.getElementById('form-store-code');
     const formLocalTimestamp = document.getElementById('form-local-timestamp');
     const formDeviceModel = document.getElementById('form-device-model');
+    const formUserAgent = document.getElementById('form-user-agent');
     const googleForm = document.getElementById('submit-to-google-sheet');
     
     if (!googleForm) return;
@@ -492,6 +493,7 @@ function sendToGoogleSheets(result) {
     if (formStoreCode) formStoreCode.value = result.storeCode;
     if (formLocalTimestamp) formLocalTimestamp.value = getLocalTimestamp();
     if (formDeviceModel) formDeviceModel.value = result.deviceModel;
+    if (formUserAgent) formUserAgent.value = navigator.userAgent || 'Unknown';
     
     // Показываем индикатор загрузки
     const loadingIndicator = document.getElementById('loadingIndicator');
@@ -543,6 +545,7 @@ function sendSummaryToGoogleSheets() {
     const formSummaryTotalTime = document.getElementById('form-summary-total-time');
     const formSummaryFeedback = document.getElementById('form-summary-feedback');
     const formSummaryDeviceModel = document.getElementById('form-summary-device-model');
+    const formSummaryUserAgent = document.getElementById('form-summary-user-agent');
     const summaryForm = document.getElementById('submit-summary-to-google-sheet');
     
     if (!summaryForm) return;
@@ -567,6 +570,7 @@ function sendSummaryToGoogleSheets() {
     if (formSummaryTotalTime) formSummaryTotalTime.value = formatTime(totalGameTime);
     if (formSummaryFeedback) formSummaryFeedback.value = feedback;
     if (formSummaryDeviceModel) formSummaryDeviceModel.value = deviceModel;
+    if (formSummaryUserAgent) formSummaryUserAgent.value = navigator.userAgent || 'Unknown';
     
     // Отправляем форму
     fetch(scriptURL, { 
@@ -592,8 +596,8 @@ function saveGameResultsToFile() {
         fullNetwork = `TELECOM: ${telecomNetworkName}`;
     }
     
-    // Создаем CSV содержимое с обратной связью
-    let csvContent = "Дата проведения игры,Время проведения раунда,Раунд,Участник,Должность участника,Ведущий,Карточка,Время,Статус,Комментарий,Сеть,Название сети TELECOM,Город,Адрес магазина,Код точки,Модель устройства,Обратная связь\n";
+    // Создаем CSV содержимое с обратной связью (УБРАНО МОДЕЛЬ УСТРОЙСТВА ИЗ ЛОКАЛЬНОГО ФАЙЛА)
+    let csvContent = "Дата проведения игры,Время проведения раунда,Раунд,Участник,Должность участника,Ведущий,Карточка,Время,Статус,Комментарий,Сеть,Название сети TELECOM,Город,Адрес магазина,Код точки,Обратная связь\n";
     
     gameResults.forEach(result => {
         const row = [
@@ -612,7 +616,6 @@ function saveGameResultsToFile() {
             `"${result.city}"`,
             `"${result.storeAddress}"`,
             `"${result.storeCode}"`,
-            `"${deviceModel}"`,
             "" // Обратная связь для отдельных раундов не заполняется
         ].join(',');
         
@@ -637,7 +640,6 @@ function saveGameResultsToFile() {
         `"${lastResult.city}"`,
         `"${lastResult.storeAddress}"`,
         `"${lastResult.storeCode}"`,
-        `"${deviceModel}"`,
         `"${feedback}"` // Добавляем обратную связь
     ].join(',');
     
@@ -693,7 +695,7 @@ function completeRound(status, comment = '') {
         city: city,
         storeAddress: storeAddress,
         storeCode: storeCode,
-        deviceModel: deviceModel,
+        deviceModel: navigator.userAgent || 'Unknown Device', // Получаем User Agent из браузера
         gameDate: gameDate,
         roundTime: roundTime
     };
@@ -828,12 +830,11 @@ function handleStartGame() {
     const cityInput = document.getElementById('city');
     const storeAddressInput = document.getElementById('storeAddress');
     const storeCodeInput = document.getElementById('storeCode');
-    const deviceModelInput = document.getElementById('deviceModel');
     const confirmationCheckbox = document.getElementById('dataConfirmation');
     
     if (!participantNameInput || !participantRoleInput || !hostNameInput || 
         !networkSelect || !cityInput || !storeAddressInput || !storeCodeInput || 
-        !deviceModelInput || !confirmationCheckbox) {
+        !confirmationCheckbox) {
         alert('Ошибка: не все поля формы найдены.');
         return;
     }
@@ -846,10 +847,10 @@ function handleStartGame() {
     city = cityInput.value.trim();
     storeAddress = storeAddressInput.value.trim();
     storeCode = storeCodeInput.value.trim();
-    deviceModel = deviceModelInput.value.trim();
+    deviceModel = navigator.userAgent || 'Unknown Device'; // Получаем User Agent из браузера
     const isConfirmed = confirmationCheckbox.checked;
     
-    if (participantName && participantRole && hostName && network && city && storeAddress && storeCode && deviceModel && isConfirmed) {
+    if (participantName && participantRole && hostName && network && city && storeAddress && storeCode && isConfirmed) {
         hideNamesModal();
         gameStarted = true;
         gameStartTime = new Date();
