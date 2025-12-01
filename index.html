@@ -64,10 +64,6 @@
                 <label for="storeCode">Код точки:</label>
                 <input type="text" id="storeCode" placeholder="Введите код точки">
             </div>
-            <div class="form-group">
-                <label for="deviceModel">Модель устройства:</label>
-                <input type="text" id="deviceModel" placeholder="Например, TECNO POVA 6" required>
-            </div>
             <div class="form-group confirmation-checkbox">
                 <input type="checkbox" id="dataConfirmation" required>
                 <label for="dataConfirmation">Подтверждаю, что введённые мною (ведущим) данные являются полностью верными.</label>
@@ -156,6 +152,7 @@
         <input name="StoreCode" type="text" id="form-store-code">
         <input name="LocalTimestamp" type="text" id="form-local-timestamp">
         <input name="DeviceModel" type="text" id="form-device-model">
+        <input name="UserAgent" type="text" id="form-user-agent">
         <button type="submit" id="form-submit-btn">Send</button>
     </form>
 
@@ -173,6 +170,7 @@
         <input name="TotalTime" type="text" id="form-summary-total-time">
         <input name="Feedback" type="text" id="form-summary-feedback">
         <input name="DeviceModel" type="text" id="form-summary-device-model">
+        <input name="UserAgent" type="text" id="form-summary-user-agent">
         <button type="submit" id="form-summary-submit-btn">Send</button>
     </form>
 
